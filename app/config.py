@@ -1,19 +1,15 @@
-import os
-from pydantic import BaseSettings
-from dotenv import load_dotenv
-
-load_dotenv()
-
-class Settings(BaseSettings):
-    TELEGRAM_BOT_TOKEN: str
-    SUPABASE_URL: str
-    SUPABASE_KEY: str
-    BASE_URL: str = "http://localhost:8000"
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
-
+import os 
+from pydantic_settings import BaseSettings, SettingsConfigDict 
+from dotenv import load_dotenv 
+load_dotenv() 
+class Settings(BaseSettings): 
+    TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN") 
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL") 
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY") 
+    BASE_URL: str = "http://localhost:8000" 
+    model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True) 
+    
+    
+    
 settings = Settings()
 
