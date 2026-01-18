@@ -1,13 +1,15 @@
 from aiogram import Bot, Dispatcher, Router, types
 from aiogram.filters import Command
 from aiogram.enums import ParseMode
+from aiogram.client.bot import DefaultBotProperties  # <-- new import
 
 from app.config import settings
 from app.database import create_user, get_user_by_chat_id
 
+# Initialize Bot with DefaultBotProperties instead of parse_mode
 bot = Bot(
     token=settings.TELEGRAM_BOT_TOKEN,
-    parse_mode=ParseMode.HTML
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
 
 dp = Dispatcher()
