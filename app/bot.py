@@ -1,4 +1,4 @@
-from aiogram import Bot, Dispatcher, Router, types
+from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties  # <-- new import
@@ -12,17 +12,15 @@ bot = Bot(
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
 
+
 dp = Dispatcher()
-router = Router()
-dp.include_router(router)
 
-
-@router.message(Command("start"))
+# --- Command handler ---
+@dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     chat_id = message.chat.id
 
     user = await get_user_by_chat_id(chat_id)
-
     if not user:
         user = await create_user(chat_id)
 

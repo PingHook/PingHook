@@ -9,63 +9,53 @@ import logging
 import asyncio
 from contextlib import asynccontextmanager
 
-
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory="app/templates")
 
-# Lifecycle management for Bot Polling
+# --- Lifespan context for startup/shutdown ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Start bot polling in the background
-    logger.info("Starting Telegram Bot Polling...")
-    #polling_task = asyncio.create_task(dp.start_polling(bot))
-    polling_task = asyncio.create_task(
-    dp.start_polling(
-        bot,
-        allowed_updates=dp.resolve_used_update_types()
-    ))
-
-    
+    logger.info("App starting up... Telegram webhooks require a public URL for testing.")
+    # You could start polling here for local testing if needed
     yield
-    
-    # Shutdown
-    logger.info("Stopping Telegram Bot...")
-    polling_task.cancel()
-    try:
-        await polling_task
-    except asyncio.CancelledError:
-        pass
-    await bot.session.close()
+    logger.info("App shutting down...")
+    await bot.session.close()  # Close Telegram session properly
 
 app = FastAPI(title="PingHook", version="1.0.0", lifespan=lifespan)
 
+# --- Root page ---
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    # We can pass variables if we want, like the bot username if we had it in config
     return templates.TemplateResponse("index.html", {"request": request})
 
+# --- Webhook endpoint for Telegram updates ---
+@app.post("/webhook/{bot_id}")
+async def telegram_webhook(request: Request, bot_id: str):
+    update = await request.json()
+    await dp.feed_update(bot, update)
+    return {"status": "ok"}
+
+# --- Webhook endpoint for sending messages manually ---
 @app.post("/send/{api_key}")
 async def receive_webhook(
     request: Request,
     api_key: str = Path(..., description="Your unique API Key")
 ):
-    # 1. Check Rate Limit
+    # Rate limit
     if is_rate_limited(api_key):
-        raise HTTPException(status_code=429, detail="Rate limit exceeded. Try again later.")
+        raise HTTPException(status_code=429, detail="Rate limit exceeded.")
 
-    # 2. Validate User and API Key
+    # Validate user
     user = await get_user_by_api_key(api_key)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid API Key.")
-        
     if not user.get("is_active", True):
         raise HTTPException(status_code=403, detail="User is inactive.")
 
-    # 3. Parse Body
+    # Parse body
     try:
         content_type = request.headers.get("Content-Type", "")
         if "application/json" in content_type:
@@ -75,12 +65,10 @@ async def receive_webhook(
     except Exception:
         body = "Error parsing body"
 
-    # 4. Format Message
+    # Format message
     message_text = format_message(body)
 
-    # 5. Send to Telegram
-    # We use a background task logic mostly, but here we await it to ensure delivery before 200 OK?
-    # Or fire and forget? "Instant Telegram notifications" -> await is better for feedback to sender.
+    # Send to Telegram
     try:
         await bot.send_message(chat_id=user["chat_id"], text=message_text)
     except Exception as e:
