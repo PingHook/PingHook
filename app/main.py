@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException, Path
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from app.bot import bot, dp
 from app.config import settings
@@ -80,3 +80,11 @@ async def receive_webhook(
         raise HTTPException(status_code=500, detail="Failed to forward message to Telegram.")
 
     return {"status": "ok", "message": "Notification sent."}
+
+@app.get("/health")
+def health():
+    return JSONResponse(
+        status_code=200,
+        content={"status": "ok"},
+        headers={"Cache-Control": "no-store"}
+    )
