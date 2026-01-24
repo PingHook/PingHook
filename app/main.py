@@ -33,9 +33,6 @@ app = FastAPI(title="PingHook", version="1.0.0", lifespan=lifespan)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/about",response_class=HTMLResponse)
-async def about(request:Request):
-    return templates.TemplateResponse('about.html',{"request":request})
 
 # --- Webhook endpoint for Telegram updates ---
 @app.post("/webhook/{bot_id}")
