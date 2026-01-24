@@ -179,6 +179,64 @@
             color: var(--text-muted);
         }
 
+        /* How It Works */
+        .how-it-works {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--accent-light);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-heading {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .step {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+        }
+
+        .step h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.15rem;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
         /* Code */
         .code-section {
             padding: 3rem 0 5rem;
@@ -215,7 +273,7 @@
             font-size: 0.9rem;
         }
 
-        /* About section */
+        /* About */
         .about {
             padding: 4rem 0;
         }
@@ -230,10 +288,6 @@
             font-size: 1.1rem;
         }
 
-        .section {
-            margin-bottom: 2rem;
-        }
-
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -244,7 +298,6 @@
 
         .card h2 {
             margin-bottom: 0.75rem;
-            font-size: 1.4rem;
         }
 
         .card p {
@@ -290,7 +343,7 @@
 
                 <div class="hero-brand">PingHook</div>
 
-                <h1><span>Webhooks to Telegram,</span><br>Instantly.</h1>
+                <h1>Webhooks to Telegram,<br><span>Instantly.</span></h1>
 
                 <p class="hero-description">
                     Get notified in Telegram when anything happens.
@@ -302,6 +355,43 @@
                         Open Telegram Bot
                     </a>
                     <p class="cta-hint">Type /start to get your unique webhook URL</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="how-it-works">
+            <div class="container">
+                <p class="section-title">How It Works</p>
+                <h2 class="section-heading">Three steps. Under a minute.</h2>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Start the Bot</h3>
+                        <p>
+                            Open Telegram and send <code>/start</code> to the bot.
+                            You'll receive a unique webhook URL instantly.
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Use Your URL</h3>
+                        <p>
+                            Paste the URL anywhere — GitHub Actions, server scripts,
+                            monitoring tools, or a simple curl command.
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Get Notified</h3>
+                        <p>
+                            Any POST request to your URL becomes a Telegram message.
+                            JSON payloads are formatted for readability.
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -345,25 +435,32 @@ curl -X POST https://pinghook.dev/send/YOUR_KEY \
 
                 <div class="card">
                     <h2>Why It Exists</h2>
-                    <p>PingHook was built to solve one problem:</p>
                     <p class="highlight">“I just want to know when something happens.”</p>
                 </div>
 
                 <div class="card">
                     <h2>Philosophy</h2>
                     <p>Simple over clever. Useful over impressive.</p>
-                    <p>If it doesn’t reduce friction, it doesn’t belong here.</p>
                 </div>
 
                 <div class="card">
                     <h2>About the Developer</h2>
                     <p>
-                        PingHook started as a personal utility and learning project,
-                        built while working with Telegram bots, APIs, and free-tier services.
+                        "Hi, I’m the developer behind <span class="highlight">PingHook</span>👋
                     </p>
                     <p>
-                        It’s now shipped publicly — built slowly, honestly, and with intent.
+                        With several years of experience in tech, I enjoy learning by building
+                        real, usable systems rather than isolated demos.
                     </p>
+                    <p>
+                        PingHook began as a FastAPI learning project — built to understand webhooks,
+                        async behavior, and request flows by solving a real problem.
+                    </p>
+                    <p>
+                        What started as an experiment became useful enough to share,
+                        and it’s now built openly with a focus on simplicity and reliability."
+                    </p>
+
                 </div>
             </div>
         </section>
