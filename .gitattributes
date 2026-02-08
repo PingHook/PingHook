@@ -1,2 +1,3 @@
 index/* linguist-detectable=false
 templates/* linguist-detectable=false
+*.html linguist-documentation=true
