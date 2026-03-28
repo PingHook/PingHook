@@ -1,54 +1,138 @@
-# PingHook 🪝
+# PingHook
 
-A simple MicroSaaS that turns Telegram into a webhook receiver. Get instant notifications in Telegram from any service.
+Turn any webhook into an instant Telegram notification — no setup, no dashboard, just a URL.
 
-## Features
-- **Zero Config**: Just start the bot to get a URL.
-- **Secure**: Unique API Key per user.
-- **Versatile**: Supports JSON, Form Data, and raw Text.
-- **Pretty**: Formats JSON nicely in Telegram.
-- **Rate Limited**: Prevents spam (5 req/min).
+---
 
-## Tech Stack
-- **Framework**: FastAPI (Python)
-- **Bot**: Aiogram 3.x
-- **Database**: Supabase (PostgreSQL)
-- **Hosting**: Render (Recommended)
+## Get Started
 
-## Local Setup
+1. Open the bot: [@pinghook_bot](https://t.me/pinghook_bot)
+2. Send `/start`
+3. Copy your webhook URL
+4. POST anything to it
 
-1. **Clone & Install**
-   ```bash
-   git clone <repo>
-   cd pinghook
-   pip install -r requirements.txt
-   ```
+That's it.
 
-2. **Environment Variables**
-   Create a `.env` file:
-   ```ini
-   TELEGRAM_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-   SUPABASE_URL=https://xyz.supabase.co
-   SUPABASE_KEY=eyJh...
-   BASE_URL=http://localhost:8000
-   ```
+---
 
-3. **Database Setup**
-   Run the SQL from `schema.sql` in your Supabase SQL Editor.
+## Sending a Notification
 
-4. **Run**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+```bash
+curl -X POST https://api.pinghook.dev/v1/user/send/{your-api-key} \
+  -H "Content-Type: application/json" \
+  -d '{"status": "deploy complete", "env": "production"}'
+```
 
-5. **Test**
-   - Open your bot in Telegram and click `/start`.
-   - Copy the URL provided.
-   - Run: `curl -X POST <URL> -d '{"msg": "It works!"}'`
+You'll receive this in Telegram instantly:
+
+```
+New Webhook Received
+
+{
+  "status": "deploy complete",
+  "env": "production"
+}
+```
+
+Supports JSON, plain text, and form data.
+
+---
+
+## Labels
+
+Append path segments after your API key to tag where the notification came from.
+
+```
+https://api.pinghook.dev/v1/user/send/{api-key}/github
+https://api.pinghook.dev/v1/user/send/{api-key}/n8n/prod
+```
+
+Your Telegram message will show:
+
+```
+📍 Source: n8n / prod
+
+New Webhook Received
+{ ...payload... }
+```
+
+Useful when you have multiple workflows or services sending to the same URL.
+
+---
+
+## Limits
+
+| | Free |
+|---|---|
+| Requests | 5 / minute |
+| Payload size | 100 KB |
+| Message length | 3000 chars (truncated beyond) |
+
+---
+
+---
+
+## Self-Hosting
+
+### Requirements
+- Python 3.11+
+- A Telegram bot token ([create one via @BotFather](https://t.me/BotFather))
+- A Supabase project
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/pinghook/pinghook
+cd pinghook
+pip install -r requirements.txt
+```
+
+### 2. Environment Variables
+
+Create a `.env` file:
+
+```ini
+TELEGRAM_BOT_TOKEN=your-token
+SUPABASE_URL=https://xyz.supabase.co
+SUPABASE_KEY=your-supabase-anon-key
+BASE_URL=http://localhost:8000
+```
+
+### 3. Database
+
+Run the contents of `schema.sql` in your Supabase SQL Editor.
+
+### 4. Run
+
+```bash
+uvicorn app.main:app --reload
+```
+
+### 5. Register Telegram Webhook
+
+Run once after starting the server:
+
+```bash
+python webhook.py
+```
+
+This tells Telegram where to send bot updates. Re-run if your `BASE_URL` changes.
+
+---
 
 ## Deployment (Render)
 
-1. **New Web Service**: Connect your GitHub repo.
-2. **Build Command**: `pip install -r requirements.txt`
-3. **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. **Environment Variables**: Add `TELEGRAM_BOT_TOKEN`, `SUPABASE_URL`, `SUPABASE_KEY`, and `BASE_URL` (set `BASE_URL` to your Render URL, e.g. `https://pinghook.onrender.com`).
+1. Connect your GitHub repo as a new Web Service
+2. **Build command:** `pip install -r requirements.txt`
+3. **Start command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add environment variables: `TELEGRAM_BOT_TOKEN`, `SUPABASE_URL`, `SUPABASE_KEY`, `BASE_URL`
+5. After deploy, run `python webhook.py` to register the Telegram webhook
+
+---
+
+## Stack
+
+- **Backend:** FastAPI + Uvicorn
+- **Bot:** Aiogram 3.x
+- **Database:** Supabase (PostgreSQL)
+- **Hosting:** Render
