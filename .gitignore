@@ -12,6 +12,7 @@ env/
 
 # Environment variables
 .env
+*.txt
 
 # OS / Editor
 .vscode/

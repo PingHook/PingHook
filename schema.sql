@@ -1,7 +1,7 @@
 -- Create users table
 create table public.users (
   id bigint primary key, -- Telegram User ID
-  chat_id bigint not null, -- Telegram Chat ID
+  chat_id bigint not null unique, -- Telegram Chat ID
   api_key uuid not null unique default gen_random_uuid(),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   is_active boolean default true not null
