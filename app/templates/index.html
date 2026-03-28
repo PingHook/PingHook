@@ -318,6 +318,16 @@
             margin-bottom: 0.75rem;
         }
 
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            background: var(--accent-glow);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--accent-light);
+            padding: 0.1em 0.4em;
+            border-radius: 4px;
+        }
+
         .highlight {
             color: var(--accent-light);
             font-weight: 600;
@@ -433,47 +443,26 @@ curl -X POST https://pinghook.dev/send/YOUR_KEY \
         </section>
 
         <!-- ABOUT -->
-        <section class="about">
-            <div class="container">
-                <div class="page-title">
-                    <h1>About <span>PingHook</span></h1>
-                    <p class="subtitle">A tiny webhook tool with a developer-first mindset</p>
+        <section class=”about”>
+            <div class=”container”>
+                <div class=”page-title”>
+                    <h2>About <span>PingHook</span></h2>
+                    <p class=”subtitle”>A tiny webhook tool with a developer-first mindset</p>
                 </div>
 
-                <div class="card">
-                    <h2>What is PingHook?</h2>
-                    <p><span class="highlight">PingHook</span> converts any webhook into a Telegram message — instantly.</p>
-                    <p>No dashboards. No logins. No configuration hell.</p>
+                <div class=”card”>
+                    <h2>Works with anything that sends a POST</h2>
+                    <p>GitHub Actions, Grafana alerts, n8n workflows, cron jobs, custom scripts — if it can make an HTTP request, it works with PingHook. No SDK, no OAuth, no setup beyond pasting a URL.</p>
                 </div>
 
-                <div class="card">
+                <div class=”card”>
                     <h2>Why It Exists</h2>
-                    <p class="highlight">“I just want to know when something happens.”</p>
+                    <p>Most notification tools require an account, a dashboard, and an afternoon of config before your first alert lands. PingHook does one thing: turns a POST request into a Telegram message. That’s it.</p>
                 </div>
 
-                <div class="card">
-                    <h2>Philosophy</h2>
-                    <p>Simple over clever. Useful over impressive.</p>
-                </div>
-
-                <div class="card">
-                    <h2>About the Developer</h2>
-                    <p>
-                        "Hi, I’m the developer behind <span class="highlight">PingHook</span>👋
-                    </p>
-                    <p>
-                        With several years of experience in tech, I enjoy learning by building
-                        real, usable systems rather than isolated demos.
-                    </p>
-                    <p>
-                        PingHook began as a FastAPI learning project — built to understand webhooks,
-                        async behavior, and request flows by solving a real problem.
-                    </p>
-                    <p>
-                        What started as an experiment became useful enough to share,
-                        and it’s now built openly with a focus on simplicity and reliability."
-                    </p>
-
+                <div class=”card”>
+                    <h2>Built by a Developer, for Developers</h2>
+                    <p>Hi, I’m the developer behind <span class=”highlight”>PingHook</span>. PingHook started as a FastAPI learning project — built to solve a real problem instead of following a tutorial. It became useful enough to share, so here it is: open source, free, and focused on staying simple.</p>
                 </div>
             </div>
         </section>
@@ -481,7 +470,7 @@ curl -X POST https://pinghook.dev/send/YOUR_KEY \
 
     <footer>
         <div class="container">
-            <p>Built for developers, by developers. Open source on GitHub.</p>
+            <p>Built for developers, by developers. &mdash; <a href="https://github.com/asafmd/PingHook" style="color: var(--accent-light); text-decoration: none;">Open source on GitHub</a></p>
         </div>
     </footer>
 </body>
