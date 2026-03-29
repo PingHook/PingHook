@@ -6,7 +6,7 @@ Turn any webhook into an instant Telegram notification — no setup, no dashboar
 
 ## Get Started
 
-1. Open the bot: [@pinghook_bot](https://t.me/pinghook_bot)
+1. Open the bot: [@pinghookbot](https://t.me/pinghookbot)
 2. Send `/start`
 3. Copy your webhook URL
 4. POST anything to it
