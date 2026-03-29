@@ -63,7 +63,7 @@ def format_message(
         )
 
     if isinstance(data, dict):
-        pretty_json = json.dumps(data, indent=2)
+        pretty_json = json.dumps(data, indent=2, ensure_ascii=False)
         safe_json = html.escape(pretty_json)
         return _truncate(
             f"<b>New Webhook Received</b>\n\n"
