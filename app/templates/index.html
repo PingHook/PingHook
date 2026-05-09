@@ -851,7 +851,7 @@ curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</spa
 curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span> \
   <span class="c-flag">-d</span> <span class="c-val">"Backup completed at $(date)"</span></pre></div>
 
-                    <div id="tab-gha" class="tab-content"><pre><span class="c-comment"># .github/workflows/notify.yml</span>
+                    <div id="tab-gha" class="tab-content"><pre>{% raw %}<span class="c-comment"># .github/workflows/notify.yml</span>
 <span class="c-key">- name:</span> <span class="c-val">Notify via PingHook</span>
   <span class="c-key">if:</span> <span class="c-val">always()</span>
   <span class="c-key">run:</span> |
@@ -863,7 +863,7 @@ curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</spa
         "repo": "${{ github.repository }}",
         "branch": "${{ github.ref_name }}",
         "run": "${{ github.run_number }}"
-      }'</pre></div>
+      }'{% endraw %}</pre></div>
 
                     <div id="tab-python" class="tab-content"><pre><span class="c-comment"># pip install requests</span>
 <span class="c-key">import</span> requests
