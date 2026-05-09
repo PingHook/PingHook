@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from aiogram.types import Update
 
 from app.bot import bot, dp
-from app.database import get_user_by_api_key, log_webhook
+from app.database import get_user_by_api_key, log_webhook, log_event
 from app.utils import is_rate_limited, format_message
 
 # -------------------------------------------------
@@ -74,6 +74,7 @@ async def handle_webhook(
 
     # Then rate limit
     if is_rate_limited(api_key):
+        await log_event("rate_limited", chat_id=user["chat_id"], metadata={"labels": labels})
         raise HTTPException(status_code=429, detail="Rate limit exceeded.")
 
     # Parse body
@@ -96,6 +97,7 @@ async def handle_webhook(
         )
     except Exception as e:
         logger.error(f"Failed to send message: {e}")
+        await log_event("send_failed", chat_id=user["chat_id"], metadata={"error": str(e), "labels": labels})
         raise HTTPException(
             status_code=500,
             detail="Failed to forward message to Telegram."

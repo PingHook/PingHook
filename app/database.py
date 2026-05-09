@@ -92,6 +92,27 @@ async def get_recent_webhooks(chat_id: int, limit: int = 10):
         return []
 
 
+async def log_event(event_type: str, chat_id: int | None = None, metadata: dict | None = None):
+    """
+    Append a behaviour analytics event.
+
+    event_type values:
+      - rate_limited   — user exceeded request quota
+      - send_failed    — Telegram delivery error
+      - bot_command    — /start, /history, /replay used
+    """
+    def _insert():
+        return (
+            supabase.table("analytics_events")
+            .insert({"event_type": event_type, "chat_id": chat_id, "metadata": metadata or {}})
+            .execute()
+        )
+    try:
+        await asyncio.to_thread(_insert)
+    except Exception as e:
+        logger.error(f"[DB] log_event failed: {e}")
+
+
 async def get_user_by_chat_id(chat_id: int):
     def _query():
         return (

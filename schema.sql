@@ -24,3 +24,16 @@ create table public.webhook_logs (
 
 create index webhook_logs_chat_id_idx on public.webhook_logs (chat_id, received_at desc);
 alter table public.webhook_logs enable row level security;
+
+-- Behaviour analytics (rate limit hits, send failures, bot commands)
+create table public.analytics_events (
+  id          bigserial primary key,
+  event_type  text not null,
+  chat_id     bigint,
+  metadata    jsonb default '{}',
+  created_at  timestamptz default timezone('utc'::text, now()) not null
+);
+
+create index analytics_events_type_idx    on public.analytics_events (event_type, created_at desc);
+create index analytics_events_chat_id_idx on public.analytics_events (chat_id, created_at desc);
+alter table public.analytics_events enable row level security;

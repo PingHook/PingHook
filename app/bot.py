@@ -8,7 +8,7 @@ from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties
 
 from app.config import settings
-from app.database import create_user, get_user_by_chat_id, get_recent_webhooks
+from app.database import create_user, get_user_by_chat_id, get_recent_webhooks, log_event
 from app.utils import format_message
 
 bot = Bot(
@@ -37,6 +37,7 @@ def _relative_time(received_at: str) -> str:
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     chat_id = message.chat.id
+    await log_event("bot_command", chat_id=chat_id, metadata={"command": "start"})
 
     user = await get_user_by_chat_id(chat_id)
     if not user:
@@ -79,6 +80,7 @@ async def cmd_start(message: types.Message):
 @dp.message(Command("history"))
 async def cmd_history(message: types.Message):
     chat_id = message.chat.id
+    await log_event("bot_command", chat_id=chat_id, metadata={"command": "history"})
     logs = await get_recent_webhooks(chat_id, limit=10)
 
     if not logs:
@@ -107,6 +109,7 @@ async def cmd_history(message: types.Message):
 @dp.message(Command("replay"))
 async def cmd_replay(message: types.Message):
     chat_id = message.chat.id
+    await log_event("bot_command", chat_id=chat_id, metadata={"command": "replay"})
 
     parts = (message.text or "").split()
     index = 1
