@@ -752,7 +752,7 @@
                     <div class="step">
                         <div class="step-number">3</div>
                         <h3>Get notified instantly</h3>
-                        <p>Every POST becomes a Telegram message. JSON is pretty-printed. Plain text is delivered as-is. Labels tag the source.</p>
+                        <p>Every POST becomes a Telegram message. JSON is pretty-printed. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, backtick code blocks. Labels tag the source.</p>
                     </div>
                 </div>
             </div>
@@ -772,9 +772,9 @@
                         <p>Append path segments to tag events by source or environment. <code>/send/key/github/prod</code> shows <em>📍 Source: github / prod</em> in chat.</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon">📋</div>
-                        <h3>JSON Pretty-Print</h3>
-                        <p>Send <code>application/json</code> and the payload is automatically indented and formatted in a monospace code block.</p>
+                        <div class="feature-icon">✨</div>
+                        <h3>Smart Formatting</h3>
+                        <p>JSON is auto-indented in a code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, <code>~~strike~~</code>, and fenced code blocks render natively in Telegram.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
@@ -809,7 +809,7 @@
                         <div class="spec-label">Max payload size</div>
                     </div>
                     <div class="spec-card">
-                        <div class="spec-value">JSON + text</div>
+                        <div class="spec-value">JSON · MD · text</div>
                         <div class="spec-label">Accepted formats</div>
                     </div>
                     <div class="spec-card">
@@ -831,6 +831,7 @@
                     <div class="code-tabs-header">
                         <button class="tab-btn active" onclick="showTab('tab-curl-json', this)">curl (JSON)</button>
                         <button class="tab-btn" onclick="showTab('tab-curl-text', this)">curl (text)</button>
+                        <button class="tab-btn" onclick="showTab('tab-markdown', this)">Markdown</button>
                         <button class="tab-btn" onclick="showTab('tab-gha', this)">GitHub Actions</button>
                         <button class="tab-btn" onclick="showTab('tab-python', this)">Python</button>
                     </div>
@@ -850,6 +851,19 @@ curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</spa
 <span class="c-comment"># Works from any shell, script, or cron job</span>
 curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span> \
   <span class="c-flag">-d</span> <span class="c-val">"Backup completed at $(date)"</span></pre></div>
+
+                    <div id="tab-markdown" class="tab-content"><pre><span class="c-comment"># Plain text with Markdown — renders natively in Telegram</span>
+curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span>/deploy \
+  <span class="c-flag">-d</span> <span class="c-val">"**Deploy succeeded** on \`main\`
+
+_Started by:_ asaf
+_Duration:_ 42s
+_Status:_ ~~failing~~ passing
+
+\`\`\`
+3 services restarted
+0 errors
+\`\`\`"</span></pre></div>
 
                     <div id="tab-gha" class="tab-content"><pre>{% raw %}<span class="c-comment"># .github/workflows/notify.yml</span>
 <span class="c-key">- name:</span> <span class="c-val">Notify via PingHook</span>
@@ -899,7 +913,7 @@ requests.post(PINGHOOK_URL, data=<span class="c-val">"ETL pipeline finished succ
                     </div>
                     <div class="faq-item">
                         <h3>What payload formats are supported?</h3>
-                        <p>JSON (<code>application/json</code>) is pretty-printed in a monospace code block. Anything else is delivered as plain text. Both formats support labels.</p>
+                        <p>JSON (<code>application/json</code>) is auto-indented in a monospace code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, <code>~~strikethrough~~</code>, inline <code>`code`</code>, and fenced code blocks all render natively in Telegram. Both formats support labels.</p>
                     </div>
                     <div class="faq-item">
                         <h3>Can I use multiple labels?</h3>
