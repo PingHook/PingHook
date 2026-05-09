@@ -37,33 +37,11 @@ MAX_MESSAGE_CHARS = 3000  # Telegram hard limit is 4096; leave headroom for head
 
 def _markdown_to_html(text: str) -> str:
     """
-    Convert a subset of Markdown to Telegram-compatible HTML.
-    Code spans are stashed with null-byte sentinels before HTML escaping
-    so their contents are never touched by bold/italic/strikethrough regexes.
+    Convert Markdown bold, italic, and strikethrough to Telegram HTML.
+    Code formatting is intentionally omitted — backticks are interpreted
+    by shells before reaching the server, making them unreliable in practice.
+    JSON payloads already render in a <pre> block automatically.
     """
-    stash: list[str] = []
-
-    def save(fragment: str) -> str:
-        # Sentinel: \x00N\x00 — null bytes are not HTML-special and
-        # contain no markdown characters (*_~`), so regexes never match inside.
-        idx = len(stash)
-        stash.append(fragment)
-        return f"\x00{idx}\x00"
-
-    # Fenced code blocks first (optional language hint stripped)
-    text = re.sub(
-        r"```(?:\w+\n)?(.*?)```",
-        lambda m: save(f"<pre>{html.escape(m.group(1).strip())}</pre>"),
-        text, flags=re.DOTALL
-    )
-    # Inline code
-    text = re.sub(
-        r"`([^`\n]+)`",
-        lambda m: save(f"<code>{html.escape(m.group(1))}</code>"),
-        text
-    )
-
-    # HTML-escape the remaining text (null bytes are not HTML-special)
     text = html.escape(text)
 
     # Bold: **text** or __text__
@@ -73,11 +51,7 @@ def _markdown_to_html(text: str) -> str:
     text = re.sub(r"\*([^*\n]+)\*", r"<i>\1</i>", text)
     text = re.sub(r"_([^_\n]+)_",   r"<i>\1</i>", text)
     # Strikethrough: ~~text~~
-    text = re.sub(r"~~(.+?)~~", r"<s>\1</s>", text, flags=re.DOTALL)
-
-    # Restore stashed code fragments
-    for idx, fragment in enumerate(stash):
-        text = text.replace(f"\x00{idx}\x00", fragment)
+    text = re.sub(r"~~(.+?)~~",     r"<s>\1</s>", text, flags=re.DOTALL)
 
     return text
 
