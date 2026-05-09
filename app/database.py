@@ -59,6 +59,39 @@ async def get_user_by_api_key(api_key: str):
         return None
 
 
+async def log_webhook(chat_id: int, labels: list[str], payload: str):
+    """Store an incoming webhook payload for history/replay."""
+    def _insert():
+        return (
+            supabase.table("webhook_logs")
+            .insert({"chat_id": chat_id, "labels": labels, "payload": payload})
+            .execute()
+        )
+    try:
+        await asyncio.to_thread(_insert)
+    except Exception as e:
+        logger.error(f"[DB] log_webhook failed: {e}")
+
+
+async def get_recent_webhooks(chat_id: int, limit: int = 10):
+    """Fetch the N most recent webhook logs for a user."""
+    def _query():
+        return (
+            supabase.table("webhook_logs")
+            .select("*")
+            .eq("chat_id", chat_id)
+            .order("received_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+    try:
+        response = await asyncio.to_thread(_query)
+        return response.data or []
+    except Exception as e:
+        logger.error(f"[DB] get_recent_webhooks failed: {e}")
+        return []
+
+
 async def get_user_by_chat_id(chat_id: int):
     def _query():
         return (

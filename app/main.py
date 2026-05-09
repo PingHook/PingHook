@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from aiogram.types import Update
 
 from app.bot import bot, dp
-from app.database import get_user_by_api_key
+from app.database import get_user_by_api_key, log_webhook
 from app.utils import is_rate_limited, format_message
 
 # -------------------------------------------------
@@ -100,6 +100,12 @@ async def handle_webhook(
             status_code=500,
             detail="Failed to forward message to Telegram."
         )
+
+    await log_webhook(
+        chat_id=user["chat_id"],
+        labels=labels,
+        payload=raw_body.decode("utf-8", errors="replace")
+    )
 
     return {"status": "ok", "message": "Notification sent."}
 

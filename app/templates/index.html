@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PingHook — Webhooks to Telegram, Instantly</title>
     <meta name="description"
-        content="Turn any webhook into a Telegram notification. No signup, no dashboard. Just a URL.">
+        content="Turn any webhook into a Telegram notification. No signup, no dashboard. Just POST to a URL.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,9 +15,7 @@
         rel="stylesheet">
 
     <style>
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -27,6 +25,9 @@
             --bg-primary: #0a0f0a;
             --bg-secondary: #0f1a0f;
             --bg-card: #142214;
+            --bg-tg: #0e1621;
+            --bg-tg-bar: #17212b;
+            --bg-tg-bubble: #182533;
             --text-primary: #ffffff;
             --text-secondary: #a1a1aa;
             --text-muted: #71717a;
@@ -51,20 +52,27 @@
             inset: 0;
             background:
                 radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.15), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(34, 197, 94, 0.08), transparent);
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(34, 197, 94, 0.06), transparent);
             z-index: -1;
+            pointer-events: none;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1040px;
             margin: 0 auto;
             padding: 0 1.5rem;
         }
 
-        /* Header */
+        /* ── Header ── */
         header {
-            padding: 1.5rem 0;
+            padding: 1.25rem 0;
             border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .logo {
@@ -72,25 +80,50 @@
             align-items: center;
             gap: 0.5rem;
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             text-decoration: none;
             color: var(--text-primary);
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             background: linear-gradient(135deg, var(--accent), #22c55e);
-            border-radius: 8px;
+            border-radius: 7px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 16px;
         }
 
-        /* Hero */
+        .github-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .github-link:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        /* ── Hero ── */
         .hero {
-            padding: 5rem 0 4rem;
-            text-align: center;
+            padding: 5rem 0 3.5rem;
+        }
+
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
         }
 
         .badge {
@@ -99,9 +132,9 @@
             gap: 0.5rem;
             background: var(--accent-glow);
             border: 1px solid rgba(16, 185, 129, 0.3);
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 100px;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: var(--accent-light);
             margin-bottom: 1.5rem;
         }
@@ -116,107 +149,200 @@
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
         }
 
         .hero-brand {
-            font-size: clamp(3.5rem, 10vw, 5.5rem);
+            font-size: clamp(2.8rem, 7vw, 4.5rem);
             font-weight: 800;
             letter-spacing: -0.04em;
-            margin-bottom: 0.75rem;
-
-            background: linear-gradient(
-                135deg,
-                #f8fafc 0%,
-                #d1fae5 35%,
-                #34d399 55%,
-                #a7f3d0 75%,
-                #ffffff 100%
-            );
+            line-height: 1.05;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #d1fae5 40%, #34d399 60%, #a7f3d0 80%, #ffffff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-
-            text-shadow:
-                0 0 30px rgba(16, 185, 129, 0.18),
-                0 0 80px rgba(16, 185, 129, 0.08);
         }
 
-
-        h1 {
-            font-size: clamp(2.3rem, 5.5vw, 3.5rem);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-        }
-
-        h1 span {
-            background: linear-gradient(135deg, var(--accent), #86efac);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-description {
-            font-size: 1.25rem;
+        .hero-tagline {
+            font-size: 1.2rem;
             color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 2.5rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .hero-tagline strong {
+            color: var(--text-primary);
         }
 
         .cta-group {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
-        .cta-button {
+        .cta-primary {
             background: var(--accent);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 12px;
+            color: #fff;
+            padding: 0.8rem 1.6rem;
+            border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            font-size: 1rem;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
         }
 
-        .cta-button:hover {
+        .cta-primary:hover {
             background: var(--accent-light);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 0.8rem 1.4rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .cta-secondary:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
         }
 
         .cta-hint {
-            font-size: 0.875rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
-        /* How It Works */
-        .how-it-works {
+        /* ── Telegram Mockup ── */
+        .telegram-mockup {
+            background: var(--bg-tg);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+            font-size: 0.875rem;
+        }
+
+        .tg-topbar {
+            background: var(--bg-tg-bar);
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tg-avatar {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--accent), #22c55e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .tg-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .tg-status {
+            font-size: 0.72rem;
+            color: var(--accent-light);
+        }
+
+        .tg-messages {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            min-height: 220px;
+        }
+
+        .tg-bubble {
+            background: var(--bg-tg-bubble);
+            border-radius: 12px 12px 12px 3px;
+            padding: 0.75rem 0.9rem;
+            max-width: 95%;
+            line-height: 1.55;
+            color: #e8e8e8;
+            font-size: 0.82rem;
+        }
+
+        .tg-bubble .source {
+            color: var(--accent-light);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .tg-bubble .title {
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .tg-bubble pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #a8d8b0;
+            white-space: pre;
+            line-height: 1.6;
+            margin-top: 0.25rem;
+        }
+
+        .tg-time {
+            font-size: 0.68rem;
+            color: #4d7a9e;
+            text-align: right;
+            margin-top: 0.35rem;
+        }
+
+        /* ── Section scaffold ── */
+        section {
             padding: 4rem 0;
         }
 
-        .section-title {
+        .section-label {
             text-align: center;
             color: var(--accent-light);
             text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.12em;
-            margin-bottom: 0.75rem;
+            font-size: 0.78rem;
+            letter-spacing: 0.14em;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
         }
 
         .section-heading {
             text-align: center;
             font-size: 1.75rem;
             font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1rem;
             margin-bottom: 3rem;
         }
 
+        /* ── How it works ── */
         .steps {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
         }
 
         .step {
@@ -227,34 +353,96 @@
         }
 
         .step-number {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             background: var(--accent-glow);
             border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 10px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
+            font-size: 0.9rem;
             color: var(--accent-light);
             margin-bottom: 1rem;
         }
 
         .step h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.15rem;
+            margin-bottom: 0.4rem;
+            font-size: 1.05rem;
         }
 
         .step p {
             color: var(--text-secondary);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
         }
 
-        /* Code */
-        .code-section {
-            padding: 3rem 0 5rem;
+        /* ── Features ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
         }
 
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* ── Integrations strip ── */
+        .integrations-section {
+            padding: 2.5rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .integrations-label {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1.25rem;
+        }
+
+        .integrations-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .integration-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 0.35rem 0.9rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ── Code section ── */
         .code-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
@@ -262,65 +450,116 @@
             overflow: hidden;
         }
 
-        .code-header {
+        .code-tabs-header {
             display: flex;
-            gap: 0.5rem;
-            padding: 1rem 1.25rem;
+            gap: 0;
             background: var(--bg-card);
             border-bottom: 1px solid var(--border);
+            padding: 0 1rem;
         }
 
-        .code-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.85rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            font-weight: 500;
         }
 
-        .code-dot.red { background: #ef4444; }
-        .code-dot.yellow { background: #eab308; }
-        .code-dot.green { background: #22c55e; }
+        .tab-btn.active {
+            color: var(--accent-light);
+            border-bottom-color: var(--accent);
+        }
 
-        .code-content {
+        .tab-btn:hover:not(.active) {
+            color: var(--text-secondary);
+        }
+
+        .tab-content {
+            display: none;
             padding: 1.5rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.75;
+            overflow-x: auto;
         }
 
-        /* About */
-        .about {
-            padding: 4rem 0;
+        .tab-content.active {
+            display: block;
         }
 
-        .page-title {
-            text-align: center;
-            margin-bottom: 3rem;
+        .tab-content .c-comment { color: #4d7a6e; }
+        .tab-content .c-key     { color: #86efac; }
+        .tab-content .c-val     { color: #fde68a; }
+        .tab-content .c-url     { color: var(--accent-light); }
+        .tab-content .c-flag    { color: #93c5fd; }
+
+        /* ── Specs strip ── */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 2.5rem;
         }
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        .card {
+        .spec-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
         }
 
-        .card h2 {
-            margin-bottom: 0.75rem;
+        .spec-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-light);
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .card p {
+        .spec-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ── FAQ ── */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .faq-item h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-primary);
+        }
+
+        .faq-item p {
             color: var(--text-secondary);
-            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
         }
 
         code {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85em;
+            font-size: 0.82em;
             background: var(--accent-glow);
             border: 1px solid rgba(16, 185, 129, 0.2);
             color: var(--accent-light);
@@ -328,17 +567,52 @@
             border-radius: 4px;
         }
 
-        .highlight {
-            color: var(--accent-light);
-            font-weight: 600;
-        }
-
+        /* ── Footer ── */
         footer {
             padding: 2rem 0;
             border-top: 1px solid var(--border);
             text-align: center;
             color: var(--text-muted);
-            font-size: 0.875rem;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 860px) {
+            .hero-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-right {
+                display: none;
+            }
+
+            .steps,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .specs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 540px) {
+            .specs-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .cta-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -346,133 +620,322 @@
 <body>
     <div class="bg-gradient"></div>
 
+    <!-- ── Header ── -->
     <header>
         <div class="container">
-            <a href="/" class="logo">
-                <div class="logo-icon">🪝</div>
-                PingHook
-            </a>
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <div class="logo-icon">🪝</div>
+                    PingHook
+                </a>
+                <a href="https://github.com/asafmd/PingHook" class="github-link" target="_blank" rel="noopener">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
         </div>
     </header>
 
     <main>
-        <!-- HERO -->
+
+        <!-- ── Hero ── -->
         <section class="hero">
             <div class="container">
-                <div class="badge">
-                    <span class="badge-dot"></span>
-                    Open Source & Free
-                </div>
+                <div class="hero-inner">
 
-                <div class="hero-brand">PingHook</div>
+                    <div class="hero-left">
+                        <div class="badge">
+                            <span class="badge-dot"></span>
+                            Free &middot; Open Source &middot; No Signup
+                        </div>
 
-                <h1>Webhooks to Telegram,<br><span>Instantly.</span></h1>
+                        <h1 class="hero-brand">Webhooks to<br>Telegram,<br>Instantly.</h1>
 
-                <p class="hero-description">
-                    Get notified in Telegram when anything happens.
-                    GitHub pushes, server alerts, CI/CD runs — one URL, zero config.
-                </p>
+                        <p class="hero-tagline">
+                            POST any payload to your unique URL.<br>
+                            It lands in your Telegram chat <strong>within seconds</strong>.<br>
+                            No account. No dashboard. No config.
+                        </p>
 
-                <div class="cta-group">
-                    <a href="https://t.me/PingHookBot" class="cta-button">
-                        Open Telegram Bot
-                    </a>
-                    <p class="cta-hint">Type /start to get your unique webhook URL</p>
+                        <div class="cta-group">
+                            <a href="https://t.me/PingHookBot" class="cta-primary" target="_blank" rel="noopener">
+                                Open in Telegram &rarr;
+                            </a>
+                            <a href="https://github.com/asafmd/PingHook" class="cta-secondary" target="_blank" rel="noopener">
+                                View Source
+                            </a>
+                        </div>
+                        <p class="cta-hint">Type /start — get your URL in under 10 seconds.</p>
+                    </div>
+
+                    <div class="hero-right">
+                        <div class="telegram-mockup">
+                            <div class="tg-topbar">
+                                <div class="tg-avatar">🪝</div>
+                                <div>
+                                    <div class="tg-name">PingHook</div>
+                                    <div class="tg-status">bot</div>
+                                </div>
+                            </div>
+                            <div class="tg-messages">
+                                <div class="tg-bubble">
+                                    <div class="source">📍 Source: github / prod</div>
+                                    <div class="title">New Webhook Received</div>
+<pre>{
+  "event": "push",
+  "repo": "myapp",
+  "branch": "main",
+  "author": "asaf",
+  "status": "success"
+}</pre>
+                                    <div class="tg-time">14:32</div>
+                                </div>
+                                <div class="tg-bubble">
+                                    <div class="source">📍 Source: grafana</div>
+                                    <div class="title">New Webhook Received</div>
+<pre>{
+  "alert": "High CPU",
+  "value": "94%",
+  "state": "alerting"
+}</pre>
+                                    <div class="tg-time">14:35</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
 
-        <!-- HOW IT WORKS -->
-        <section class="how-it-works">
+        <!-- ── Works with ── -->
+        <div class="integrations-section">
             <div class="container">
-                <p class="section-title">How It Works</p>
+                <p class="integrations-label">Works with anything that can send a POST request</p>
+                <div class="integrations-row">
+                    <span class="integration-pill">GitHub Actions</span>
+                    <span class="integration-pill">Grafana</span>
+                    <span class="integration-pill">n8n</span>
+                    <span class="integration-pill">Zapier</span>
+                    <span class="integration-pill">Make</span>
+                    <span class="integration-pill">cron jobs</span>
+                    <span class="integration-pill">Python scripts</span>
+                    <span class="integration-pill">Node.js</span>
+                    <span class="integration-pill">curl</span>
+                    <span class="integration-pill">Uptime Kuma</span>
+                    <span class="integration-pill">Prometheus AlertManager</span>
+                    <span class="integration-pill">Any HTTP client</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── How it works ── -->
+        <section>
+            <div class="container">
+                <p class="section-label">How It Works</p>
                 <h2 class="section-heading">Three steps. Under a minute.</h2>
+                <p class="section-sub">No email. No OAuth. No SDK.</p>
 
                 <div class="steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <h3>Start the Bot</h3>
-                        <p>
-                            Open Telegram and send <code>/start</code> to the bot.
-                            You'll receive a unique webhook URL instantly.
-                        </p>
+                        <h3>Start the bot</h3>
+                        <p>Open Telegram, message <code>@PingHookBot</code>, and type <code>/start</code>. You get a unique webhook URL immediately.</p>
                     </div>
-
                     <div class="step">
                         <div class="step-number">2</div>
-                        <h3>Use Your URL</h3>
-                        <p>
-                            Paste the URL anywhere — GitHub Actions, server scripts,
-                            monitoring tools, or a simple curl command.
-                        </p>
+                        <h3>Paste the URL anywhere</h3>
+                        <p>Add it to GitHub Actions, Grafana, n8n, a cron job, or just curl it from your terminal. If it sends HTTP, it works.</p>
                     </div>
-
                     <div class="step">
                         <div class="step-number">3</div>
-                        <h3>Get Notified</h3>
-                        <p>
-                            Any POST request to your URL becomes a Telegram message.
-                            JSON payloads are formatted for readability.
-                        </p>
+                        <h3>Get notified instantly</h3>
+                        <p>Every POST becomes a Telegram message. JSON is pretty-printed. Plain text is delivered as-is. Labels tag the source.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- CURL -->
-        <section class="code-section">
+        <!-- ── Features ── -->
+        <section style="padding-top: 0;">
             <div class="container">
+                <p class="section-label">Features</p>
+                <h2 class="section-heading">Everything you need. Nothing you don't.</h2>
+                <p class="section-sub" style="margin-bottom: 2.5rem;"></p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🏷️</div>
+                        <h3>Smart Labels</h3>
+                        <p>Append path segments to tag events by source or environment. <code>/send/key/github/prod</code> shows <em>📍 Source: github / prod</em> in chat.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📋</div>
+                        <h3>JSON Pretty-Print</h3>
+                        <p>Send <code>application/json</code> and the payload is automatically indented and formatted in a monospace code block.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Zero Config</h3>
+                        <p>No SDK. No OAuth. No account. Your webhook URL is your only credential — paste it, POST to it, done.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📜</div>
+                        <h3>Webhook History</h3>
+                        <p>Use <code>/history</code> in the bot to see your last 10 webhooks — timestamp, labels, and payload preview, all in Telegram.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">↩️</div>
+                        <h3>Replay Webhooks</h3>
+                        <p>Type <code>/replay 3</code> to resend the 3rd most recent payload to your chat. Debug without re-triggering your pipeline.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Write-Only URLs</h3>
+                        <p>Your URL can only trigger notifications — it can never be used to read your data. History stays inside Telegram, where only you can access it.</p>
+                    </div>
+                </div>
+
+                <!-- Specs -->
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <div class="spec-value">5/min</div>
+                        <div class="spec-label">Rate limit (free tier)</div>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-value">100 KB</div>
+                        <div class="spec-label">Max payload size</div>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-value">JSON + text</div>
+                        <div class="spec-label">Accepted formats</div>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-value">&lt;1s</div>
+                        <div class="spec-label">Typical delivery time</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Code section ── -->
+        <section style="padding-top: 0;">
+            <div class="container">
+                <p class="section-label">Quick Start</p>
+                <h2 class="section-heading">Paste. Send. Done.</h2>
+                <p class="section-sub">Replace <code>YOUR_KEY</code> with the URL from the bot.</p>
+
                 <div class="code-card">
-                    <div class="code-header">
-                        <span class="code-dot red"></span>
-                        <span class="code-dot yellow"></span>
-                        <span class="code-dot green"></span>
+                    <div class="code-tabs-header">
+                        <button class="tab-btn active" onclick="showTab('tab-curl-json', this)">curl (JSON)</button>
+                        <button class="tab-btn" onclick="showTab('tab-curl-text', this)">curl (text)</button>
+                        <button class="tab-btn" onclick="showTab('tab-gha', this)">GitHub Actions</button>
+                        <button class="tab-btn" onclick="showTab('tab-python', this)">Python</button>
                     </div>
-                    <div class="code-content">
-<pre># Send a test notification
-curl -X POST https://pinghook.dev/send/YOUR_KEY \
-  -H "Content-Type: application/json" \
-  -d '{"event":"deploy_success"}'
 
-# Or plain text
-curl -X POST https://pinghook.dev/send/YOUR_KEY \
-  -d "Server restarted successfully"</pre>
+                    <div id="tab-curl-json" class="tab-content active"><pre><span class="c-comment"># Send a JSON payload with a label</span>
+curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span>/github/prod \
+  <span class="c-flag">-H</span> <span class="c-val">"Content-Type: application/json"</span> \
+  <span class="c-flag">-d</span> <span class="c-val">'{"event":"push","repo":"myapp","branch":"main","status":"success"}'</span>
+
+<span class="c-comment"># Response</span>
+{ <span class="c-key">"status"</span>: <span class="c-val">"ok"</span>, <span class="c-key">"message"</span>: <span class="c-val">"Notification sent."</span> }</pre></div>
+
+                    <div id="tab-curl-text" class="tab-content"><pre><span class="c-comment"># Plain text — no Content-Type header needed</span>
+curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span>/server \
+  <span class="c-flag">-d</span> <span class="c-val">"Deployment finished. All checks passed."</span>
+
+<span class="c-comment"># Works from any shell, script, or cron job</span>
+curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span> \
+  <span class="c-flag">-d</span> <span class="c-val">"Backup completed at $(date)"</span></pre></div>
+
+                    <div id="tab-gha" class="tab-content"><pre><span class="c-comment"># .github/workflows/notify.yml</span>
+<span class="c-key">- name:</span> <span class="c-val">Notify via PingHook</span>
+  <span class="c-key">if:</span> <span class="c-val">always()</span>
+  <span class="c-key">run:</span> |
+    curl -s -X POST \
+      https://pinghook.dev/v1/user/send/<span class="c-url">${{ secrets.PINGHOOK_KEY }}</span>/github/<span class="c-url">${{ github.ref_name }}</span> \
+      -H "Content-Type: application/json" \
+      -d '{
+        "event": "workflow_${{ job.status }}",
+        "repo": "${{ github.repository }}",
+        "branch": "${{ github.ref_name }}",
+        "run": "${{ github.run_number }}"
+      }'</pre></div>
+
+                    <div id="tab-python" class="tab-content"><pre><span class="c-comment"># pip install requests</span>
+<span class="c-key">import</span> requests
+
+PINGHOOK_URL = <span class="c-val">"https://pinghook.dev/v1/user/send/YOUR_KEY"</span>
+
+requests.post(
+    f<span class="c-val">"{PINGHOOK_URL}/my-script"</span>,
+    json={<span class="c-val">"event"</span>: <span class="c-val">"job_done"</span>, <span class="c-val">"rows_processed"</span>: 42_819}
+)
+
+<span class="c-comment"># Or plain text</span>
+requests.post(PINGHOOK_URL, data=<span class="c-val">"ETL pipeline finished successfully"</span>)</pre></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── FAQ ── -->
+        <section style="padding-top: 0; padding-bottom: 5rem;">
+            <div class="container">
+                <p class="section-label">FAQ</p>
+                <h2 class="section-heading">Common questions</h2>
+                <p class="section-sub" style="margin-bottom: 2rem;"></p>
+
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <h3>Is my payload data stored?</h3>
+                        <p>Yes — PingHook now stores your last webhooks so you can view them with <code>/history</code> and replay them with <code>/replay N</code>. Your history is only accessible through your own Telegram chat — not via the webhook URL, not via any dashboard.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>What's the rate limit?</h3>
+                        <p>Free tier: 5 requests per 60 seconds per webhook URL. Payloads over 100 KB are rejected with a 413. Larger limits are planned for a paid tier.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>What payload formats are supported?</h3>
+                        <p>JSON (<code>application/json</code>) is pretty-printed in a monospace code block. Anything else is delivered as plain text. Both formats support labels.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Can I use multiple labels?</h3>
+                        <p>Yes — chain as many path segments as you want: <code>/send/key/github/prod/backend</code> shows <em>📍 Source: github / prod / backend</em>. Labels are lowercased automatically.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Can I self-host this?</h3>
+                        <p>Yes. PingHook is fully open source. Clone the repo, add your own <code>.env</code>, and run it with Uvicorn. The <code>schema.sql</code> file creates everything you need in any PostgreSQL database.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>What if someone gets my webhook URL?</h3>
+                        <p>The URL is write-only — all it can do is send a notification to <em>your</em> Telegram chat. The rate limiter caps abuse at 5 pings per minute. To regenerate your key, just message the bot — feature coming soon.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ABOUT -->
-        <section class=”about”>
-            <div class=”container”>
-                <div class=”page-title”>
-                    <h2>About <span>PingHook</span></h2>
-                    <p class=”subtitle”>A tiny webhook tool with a developer-first mindset</p>
-                </div>
-
-                <div class=”card”>
-                    <h2>Works with anything that sends a POST</h2>
-                    <p>GitHub Actions, Grafana alerts, n8n workflows, cron jobs, custom scripts — if it can make an HTTP request, it works with PingHook. No SDK, no OAuth, no setup beyond pasting a URL.</p>
-                </div>
-
-                <div class=”card”>
-                    <h2>Why It Exists</h2>
-                    <p>Most notification tools require an account, a dashboard, and an afternoon of config before your first alert lands. PingHook does one thing: turns a POST request into a Telegram message. That’s it.</p>
-                </div>
-
-                <div class=”card”>
-                    <h2>Built by a Developer, for Developers</h2>
-                    <p>Hi, I’m the developer behind <span class=”highlight”>PingHook</span>. PingHook started as a FastAPI learning project — built to solve a real problem instead of following a tutorial. It became useful enough to share, so here it is: open source, free, and focused on staying simple.</p>
-                </div>
-            </div>
-        </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>Built for developers, by developers. &mdash; <a href="https://github.com/asafmd/PingHook" style="color: var(--accent-light); text-decoration: none;">Open source on GitHub</a></p>
+            <p>
+                Built by a developer, for developers &mdash;
+                <a href="https://github.com/asafmd/PingHook" target="_blank" rel="noopener">Open source on GitHub</a>
+            </p>
         </div>
     </footer>
-</body>
 
+    <script>
+        function showTab(id, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+        }
+    </script>
+
+</body>
 </html>
