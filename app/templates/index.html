@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PingHook — Webhooks to Telegram, Instantly</title>
+    <title>PingHook — Webhooks to Telegram, Slack &amp; Discord</title>
     <meta name="description"
-        content="Turn any webhook into a Telegram notification. No signup, no dashboard. Just POST to a URL.">
+        content="Turn any webhook into an instant notification. Deliver to Telegram, Slack, or Discord. No signup, no dashboard. Just POST to a URL.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -167,12 +167,38 @@
         .hero-tagline {
             font-size: 1.2rem;
             color: var(--text-secondary);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             line-height: 1.6;
         }
 
         .hero-tagline strong {
             color: var(--text-primary);
+        }
+
+        .platform-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .platform-divider {
+            color: var(--text-muted);
+            font-size: 0.75rem;
         }
 
         .cta-group {
@@ -219,6 +245,22 @@
             margin-top: 0.75rem;
             font-size: 0.8rem;
             color: var(--text-muted);
+        }
+
+        /* ── Live counter ── */
+        .live-counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.6rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .live-counter .counter-value {
+            color: var(--accent-light);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         /* ── Telegram Mockup ── */
@@ -281,16 +323,11 @@
             font-size: 0.82rem;
         }
 
-        .tg-bubble .source {
+        .tg-bubble .label-tag {
             color: var(--accent-light);
             font-weight: 600;
             margin-bottom: 0.3rem;
-        }
-
-        .tg-bubble .title {
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 0.5rem;
+            font-size: 0.78rem;
         }
 
         .tg-bubble pre {
@@ -651,13 +688,21 @@
                             Free &middot; Open Source &middot; No Signup
                         </div>
 
-                        <h1 class="hero-brand">Webhooks to<br>Telegram,<br>Instantly.</h1>
+                        <h1 class="hero-brand">Webhooks to<br>Telegram, Slack<br>&amp; Discord.</h1>
 
                         <p class="hero-tagline">
                             POST any payload to your unique URL.<br>
-                            It lands in your Telegram chat <strong>within seconds</strong>.<br>
+                            It lands in your chat <strong>within seconds</strong>.<br>
                             No account. No dashboard. No config.
                         </p>
+
+                        <div class="platform-row">
+                            <span class="platform-badge">✈️ Telegram</span>
+                            <span class="platform-divider">+</span>
+                            <span class="platform-badge">💬 Slack</span>
+                            <span class="platform-divider">+</span>
+                            <span class="platform-badge">🎮 Discord</span>
+                        </div>
 
                         <div class="cta-group">
                             <a href="https://t.me/PingHookBot" class="cta-primary" target="_blank" rel="noopener">
@@ -668,6 +713,10 @@
                             </a>
                         </div>
                         <p class="cta-hint">Type /start — get your URL in under 10 seconds.</p>
+                        <div class="live-counter">
+                            <span class="counter-value" id="ping-count">—</span>
+                            <span>pings delivered today</span>
+                        </div>
                     </div>
 
                     <div class="hero-right">
@@ -675,30 +724,27 @@
                             <div class="tg-topbar">
                                 <div class="tg-avatar">🪝</div>
                                 <div>
-                                    <div class="tg-name">PingHook</div>
+                                    <div class="tg-name">PingHookBot</div>
                                     <div class="tg-status">bot</div>
                                 </div>
                             </div>
                             <div class="tg-messages">
                                 <div class="tg-bubble">
-                                    <div class="source">📍 Source: github / prod</div>
-                                    <div class="title">New Webhook Received</div>
+                                    <div class="label-tag">🔔 [ci-failed]</div>
 <pre>{
-  "event": "push",
   "repo": "myapp",
   "branch": "main",
-  "author": "asaf",
-  "status": "success"
+  "status": "failed",
+  "run": 142
 }</pre>
                                     <div class="tg-time">14:32</div>
                                 </div>
                                 <div class="tg-bubble">
-                                    <div class="source">📍 Source: grafana</div>
-                                    <div class="title">New Webhook Received</div>
+                                    <div class="label-tag">🔔 [payment-received]</div>
 <pre>{
-  "alert": "High CPU",
-  "value": "94%",
-  "state": "alerting"
+  "amount": 49.00,
+  "currency": "USD",
+  "customer": "jane@acme.com"
 }</pre>
                                     <div class="tg-time">14:35</div>
                                 </div>
@@ -752,7 +798,7 @@
                     <div class="step">
                         <div class="step-number">3</div>
                         <h3>Get notified instantly</h3>
-                        <p>Every POST becomes a Telegram message. JSON is pretty-printed in a code block. Plain text supports <code>**bold**</code>, <code>_italic_</code>, and <code>~~strikethrough~~</code>. Labels tag the source.</p>
+                        <p>Every POST becomes a message in your Telegram chat. Optionally connect Slack or Discord via <code>/connect slack</code> and fan out to all three at once.</p>
                     </div>
                 </div>
             </div>
@@ -767,41 +813,41 @@
 
                 <div class="features-grid">
                     <div class="feature-card">
+                        <div class="feature-icon">📡</div>
+                        <h3>Multi-Channel Delivery</h3>
+                        <p>Fan out to Telegram, Slack, and Discord simultaneously. Connect Slack with <code>/connect slack &lt;url&gt;</code> — PingHook validates and sends a test ping before saving.</p>
+                    </div>
+                    <div class="feature-card">
                         <div class="feature-icon">🏷️</div>
                         <h3>Smart Labels</h3>
-                        <p>Append path segments to tag events by source or environment. <code>/send/key/github/prod</code> shows <em>📍 Source: github / prod</em> in chat.</p>
+                        <p>Tag events by source: <code>/send/key/ci-failed</code>, <code>/send/key/payment-received</code>. The label shows in every message and powers alerting rules.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">✨</div>
                         <h3>Smart Formatting</h3>
-                        <p>JSON is auto-indented in a code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, and <code>~~strikethrough~~</code> render natively in Telegram.</p>
+                        <p>JSON is auto-indented in a code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, and <code>~~strikethrough~~</code> render natively.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔕</div>
+                        <h3>Alerting Rules</h3>
+                        <p>Filter noise with <code>/rules add keyword error</code>, <code>/rules add dedup 10</code>, <code>/rules add quiet 22 8</code>. All rules are AND conditions — full control, zero friction.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
                         <h3>Zero Config</h3>
-                        <p>No SDK. No OAuth. No account. Your webhook URL is your only credential — paste it, POST to it, done.</p>
+                        <p>No SDK. No OAuth. No account. Your webhook URL is your only credential — paste it, POST to it, done. The Telegram bot is the entire control plane.</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon">📜</div>
-                        <h3>Webhook History</h3>
-                        <p>Use <code>/history</code> in the bot to see your last 10 webhooks — timestamp, labels, and payload preview, all in Telegram.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">↩️</div>
-                        <h3>Replay Webhooks</h3>
-                        <p>Type <code>/replay 3</code> to resend the 3rd most recent payload to your chat. Debug without re-triggering your pipeline.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🔒</div>
-                        <h3>Write-Only URLs</h3>
-                        <p>Your URL can only trigger notifications — it can never be used to read your data. History stays inside Telegram, where only you can access it.</p>
+                        <div class="feature-icon">🔑</div>
+                        <h3>Instant Key Regen</h3>
+                        <p>Send <code>/regen confirm</code> to invalidate your current key and get a new one immediately. All connected channels are notified with the new URL automatically.</p>
                     </div>
                 </div>
 
                 <!-- Specs -->
                 <div class="specs-grid">
                     <div class="spec-card">
-                        <div class="spec-value">5/min</div>
+                        <div class="spec-value">100/hr</div>
                         <div class="spec-label">Rate limit (free tier)</div>
                     </div>
                     <div class="spec-card">
@@ -809,8 +855,8 @@
                         <div class="spec-label">Max payload size</div>
                     </div>
                     <div class="spec-card">
-                        <div class="spec-value">JSON · MD · text</div>
-                        <div class="spec-label">Accepted formats</div>
+                        <div class="spec-value">3 platforms</div>
+                        <div class="spec-label">Delivery targets</div>
                     </div>
                     <div class="spec-card">
                         <div class="spec-value">&lt;1s</div>
@@ -837,23 +883,23 @@
                     </div>
 
                     <div id="tab-curl-json" class="tab-content active"><pre><span class="c-comment"># Send a JSON payload with a label</span>
-curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span>/github/prod \
+curl -X POST https://pinghook.dev/send/<span class="c-url">YOUR_KEY</span>/ci-failed \
   <span class="c-flag">-H</span> <span class="c-val">"Content-Type: application/json"</span> \
-  <span class="c-flag">-d</span> <span class="c-val">'{"event":"push","repo":"myapp","branch":"main","status":"success"}'</span>
+  <span class="c-flag">-d</span> <span class="c-val">'{"event":"test_failed","repo":"myapp","branch":"main","run":142}'</span>
 
 <span class="c-comment"># Response</span>
-{ <span class="c-key">"status"</span>: <span class="c-val">"ok"</span>, <span class="c-key">"message"</span>: <span class="c-val">"Notification sent."</span> }</pre></div>
+{ <span class="c-key">"status"</span>: <span class="c-val">"success"</span>, <span class="c-key">"channels_notified"</span>: <span class="c-val">2</span> }</pre></div>
 
                     <div id="tab-curl-text" class="tab-content"><pre><span class="c-comment"># Plain text — no Content-Type header needed</span>
-curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span>/server \
-  <span class="c-flag">-d</span> <span class="c-val">"Deployment finished. All checks passed."</span>
+curl -X POST https://pinghook.dev/send/<span class="c-url">YOUR_KEY</span>/cron-done \
+  <span class="c-flag">-d</span> <span class="c-val">"Backup completed at $(date)"</span>
 
-<span class="c-comment"># Works from any shell, script, or cron job</span>
-curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span> \
-  <span class="c-flag">-d</span> <span class="c-val">"Backup completed at $(date)"</span></pre></div>
+<span class="c-comment"># Fan out to one specific platform only</span>
+curl -X POST "https://pinghook.dev/send/<span class="c-url">YOUR_KEY</span>/deploy?channel=slack" \
+  <span class="c-flag">-d</span> <span class="c-val">"Deploy succeeded on main"</span></pre></div>
 
                     <div id="tab-markdown" class="tab-content"><pre><span class="c-comment"># Plain text with Markdown — renders natively in Telegram</span>
-curl -X POST https://pinghook.dev/v1/user/send/<span class="c-url">YOUR_KEY</span>/deploy \
+curl -X POST https://pinghook.dev/send/<span class="c-url">YOUR_KEY</span>/deploy \
   <span class="c-flag">-d</span> <span class="c-val">"**Deploy succeeded** on main
 
 _Started by:_ asaf
@@ -868,7 +914,7 @@ _Status:_ ~~failing~~ passing"</span>
   <span class="c-key">if:</span> <span class="c-val">always()</span>
   <span class="c-key">run:</span> |
     curl -s -X POST \
-      https://pinghook.dev/v1/user/send/<span class="c-url">${{ secrets.PINGHOOK_KEY }}</span>/github/<span class="c-url">${{ github.ref_name }}</span> \
+      https://pinghook.dev/send/<span class="c-url">${{ secrets.PINGHOOK_KEY }}</span>/github \
       -H "Content-Type: application/json" \
       -d '{
         "event": "workflow_${{ job.status }}",
@@ -880,15 +926,15 @@ _Status:_ ~~failing~~ passing"</span>
                     <div id="tab-python" class="tab-content"><pre><span class="c-comment"># pip install requests</span>
 <span class="c-key">import</span> requests
 
-PINGHOOK_URL = <span class="c-val">"https://pinghook.dev/v1/user/send/YOUR_KEY"</span>
+PINGHOOK_URL = <span class="c-val">"https://pinghook.dev/send/YOUR_KEY"</span>
 
 requests.post(
-    f<span class="c-val">"{PINGHOOK_URL}/my-script"</span>,
-    json={<span class="c-val">"event"</span>: <span class="c-val">"job_done"</span>, <span class="c-val">"rows_processed"</span>: 42_819}
+    f<span class="c-val">"{PINGHOOK_URL}/payment-received"</span>,
+    json={<span class="c-val">"amount"</span>: 49.00, <span class="c-val">"customer"</span>: <span class="c-val">"jane@acme.com"</span>}
 )
 
 <span class="c-comment"># Or plain text</span>
-requests.post(PINGHOOK_URL, data=<span class="c-val">"ETL pipeline finished successfully"</span>)</pre></div>
+requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span class="c-val">"ETL pipeline finished"</span>)</pre></div>
                 </div>
             </div>
         </section>
@@ -902,28 +948,28 @@ requests.post(PINGHOOK_URL, data=<span class="c-val">"ETL pipeline finished succ
 
                 <div class="faq-list">
                     <div class="faq-item">
-                        <h3>Is my payload data stored?</h3>
-                        <p>Yes — PingHook now stores your last webhooks so you can view them with <code>/history</code> and replay them with <code>/replay N</code>. Your history is only accessible through your own Telegram chat — not via the webhook URL, not via any dashboard.</p>
+                        <h3>How do I add Slack or Discord?</h3>
+                        <p>Open the Telegram bot and send <code>/connect slack https://hooks.slack.com/...</code> or <code>/connect discord https://discord.com/api/webhooks/...</code>. PingHook validates the URL with a test ping before saving. Once connected, all future webhooks fan out to every channel at once.</p>
                     </div>
                     <div class="faq-item">
                         <h3>What's the rate limit?</h3>
-                        <p>Free tier: 5 requests per 60 seconds per webhook URL. Payloads over 100 KB are rejected with a 413. Larger limits are planned for a paid tier.</p>
+                        <p>Free tier: 100 requests per hour, 1,000 per day, per webhook URL. Payloads over 100 KB are rejected with a 413. The error response includes a <code>resets_in</code> field so you know exactly when you can retry.</p>
                     </div>
                     <div class="faq-item">
                         <h3>What payload formats are supported?</h3>
-                        <p>JSON (<code>application/json</code>) is auto-indented in a monospace code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, and <code>~~strikethrough~~</code> all render natively in Telegram. Both formats support labels.</p>
+                        <p>JSON is auto-indented in a monospace code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, and <code>~~strikethrough~~</code> all render natively in Telegram. Both formats support labels.</p>
                     </div>
                     <div class="faq-item">
-                        <h3>Can I use multiple labels?</h3>
-                        <p>Yes — chain as many path segments as you want: <code>/send/key/github/prod/backend</code> shows <em>📍 Source: github / prod / backend</em>. Labels are lowercased automatically.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Can I self-host this?</h3>
-                        <p>Yes. PingHook is fully open source. Clone the repo, add your own <code>.env</code>, and run it with Uvicorn. The <code>schema.sql</code> file creates everything you need in any PostgreSQL database.</p>
+                        <h3>How do alerting rules work?</h3>
+                        <p>Rules are AND conditions — a ping is delivered only if all active rules pass. Use <code>/rules add keyword error</code> to filter by content, <code>/rules add dedup 10</code> to suppress the same label within 10 minutes, <code>/rules add quiet 22 8</code> for overnight silence, or <code>/rules add labels ci-failed deploy-prod</code> to whitelist specific labels.</p>
                     </div>
                     <div class="faq-item">
                         <h3>What if someone gets my webhook URL?</h3>
-                        <p>The URL is write-only — all it can do is send a notification to <em>your</em> Telegram chat. The rate limiter caps abuse at 5 pings per minute. To regenerate your key, just message the bot — feature coming soon.</p>
+                        <p>The URL is write-only — it can only trigger notifications to your chat, never read data. If compromised, send <code>/regen confirm</code> in the bot. Your old key is invalidated immediately and all connected channels receive the new URL automatically.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Can I self-host this?</h3>
+                        <p>Yes. PingHook is fully open source. Clone the repo, add your own <code>.env</code>, run the schema in Supabase, and start with Uvicorn. The <code>schema.sql</code> creates everything in any PostgreSQL database.</p>
                     </div>
                 </div>
             </div>
@@ -947,6 +993,16 @@ requests.post(PINGHOOK_URL, data=<span class="c-val">"ETL pipeline finished succ
             document.getElementById(id).classList.add('active');
             btn.classList.add('active');
         }
+
+        fetch('/api/stats/public')
+            .then(r => r.json())
+            .then(d => {
+                const el = document.getElementById('ping-count');
+                if (el && d.pings_today !== undefined) {
+                    el.textContent = d.pings_today.toLocaleString();
+                }
+            })
+            .catch(() => {});
     </script>
 
 </body>

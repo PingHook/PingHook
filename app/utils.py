@@ -1,95 +1,51 @@
 import html
 import json
 import re
-import time
-from collections import defaultdict
-from typing import Dict, Tuple
+from datetime import datetime, timezone
 
-# -------------------------------------------------
-# Rate Limiter — fixed window, in-memory
-# -------------------------------------------------
-_rate_limit_store: Dict[str, Tuple[int, int]] = defaultdict(lambda: (0, 0))
-RATE_LIMIT_REQUESTS = 5
-RATE_LIMIT_WINDOW = 60  # seconds
-
-
-def is_rate_limited(api_key: str) -> bool:
-    """Returns True if the user has exceeded the rate limit."""
-    current_time = int(time.time())
-    window_start, count = _rate_limit_store[api_key]
-
-    if current_time - window_start > RATE_LIMIT_WINDOW:
-        _rate_limit_store[api_key] = (current_time, 1)
-        return False
-
-    if count >= RATE_LIMIT_REQUESTS:
-        return True
-
-    _rate_limit_store[api_key] = (window_start, count + 1)
-    return False
-
-
-# -------------------------------------------------
-# Message Formatter
-# -------------------------------------------------
-MAX_MESSAGE_CHARS = 3000  # Telegram hard limit is 4096; leave headroom for headers
+MAX_MESSAGE_CHARS = 4000
 
 
 def _markdown_to_html(text: str) -> str:
-    """
-    Convert Markdown bold, italic, and strikethrough to Telegram HTML.
-    Code formatting is intentionally omitted — backticks are interpreted
-    by shells before reaching the server, making them unreliable in practice.
-    JSON payloads already render in a <pre> block automatically.
-    """
     text = html.escape(text)
-
-    # Bold: **text** or __text__
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text, flags=re.DOTALL)
     text = re.sub(r"__(.+?)__",     r"<b>\1</b>", text, flags=re.DOTALL)
-    # Italic: *text* or _text_ (single, not double)
     text = re.sub(r"\*([^*\n]+)\*", r"<i>\1</i>", text)
     text = re.sub(r"_([^_\n]+)_",   r"<i>\1</i>", text)
-    # Strikethrough: ~~text~~
     text = re.sub(r"~~(.+?)~~",     r"<s>\1</s>", text, flags=re.DOTALL)
-
     return text
 
 
-def _truncate(text: str) -> str:
-    if len(text) > MAX_MESSAGE_CHARS:
-        return text[:MAX_MESSAGE_CHARS] + "\n\n<i>[message truncated]</i>"
+def _truncate(text: str, max_chars: int = MAX_MESSAGE_CHARS) -> str:
+    if len(text) > max_chars:
+        return text[:max_chars] + "\n\n<i>[message truncated]</i>"
     return text
 
 
-def format_message(
-    data: dict | str | None,
-    labels: list[str] | None = None
-) -> str:
-    """Formats incoming webhook data into a Telegram-safe HTML message."""
-    labels = labels or []
+def format_telegram_message(label: str, payload: str) -> str:
+    header = f"🔔 <b>[{html.escape(label)}]</b>\n\n" if label else ""
+    if not payload:
+        return (header + "<i>Empty payload.</i>").strip() or "<i>Empty payload.</i>"
 
-    label_text = ""
-    if labels:
-        label_text = f"📍 <b>Source:</b> {' / '.join(labels)}\n\n"
+    try:
+        parsed = json.loads(payload)
+        body = f"<pre>{html.escape(json.dumps(parsed, indent=2))}</pre>"
+    except (json.JSONDecodeError, ValueError):
+        body = _markdown_to_html(payload)
 
-    if data is None:
-        return f"{label_text}<i>Received empty payload.</i>"
+    return _truncate(header + body)
 
-    if isinstance(data, str):
-        return _truncate(
-            f"<b>New Webhook Received</b>\n\n"
-            f"{label_text}"
-            f"{_markdown_to_html(data)}"
-        )
 
-    if isinstance(data, dict):
-        pretty_json = json.dumps(data, indent=2, ensure_ascii=False)
-        safe_json = html.escape(pretty_json)
-        return _truncate(
-            f"<b>New Webhook Received</b>\n\n"
-            f"{label_text}"
-            f"<pre>{safe_json}</pre>"
-        )
-
-    return f"{label_text}<i>Unsupported payload format.</i>"
+def relative_time(ts_str: str) -> str:
+    try:
+        dt   = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+        diff = int((datetime.now(timezone.utc) - dt).total_seconds())
+        if diff < 60:
+            return f"{diff}s ago"
+        if diff < 3600:
+            return f"{diff // 60}m ago"
+        if diff < 86400:
+            return f"{diff // 3600}h ago"
+        return f"{diff // 86400}d ago"
+    except Exception:
+        return ts_str
