@@ -604,6 +604,265 @@
             border-radius: 4px;
         }
 
+        /* ── Advanced strip ── */
+        .advanced-strip {
+            margin-top: 1.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .advanced-tag {
+            flex-shrink: 0;
+            background: rgba(113, 113, 122, 0.15);
+            border: 1px solid rgba(113, 113, 122, 0.3);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            margin-top: 0.15rem;
+        }
+
+        .advanced-strip p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* ── Docs collapsible ── */
+        .docs-collapsible {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .docs-summary {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            list-style: none;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .docs-summary::-webkit-details-marker { display: none; }
+
+        .docs-summary:hover {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .docs-summary-hint {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 0.875rem;
+            margin-left: 0.25rem;
+        }
+
+        .docs-chevron {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: transform 0.2s;
+        }
+
+        .docs-collapsible[open] .docs-chevron {
+            transform: rotate(90deg);
+        }
+
+        .docs-body {
+            border-top: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            display: grid;
+            gap: 2.5rem;
+        }
+
+        .docs-section h3 {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+        }
+
+        .docs-section p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin-bottom: 0.75rem;
+        }
+
+        .docs-endpoint {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin-bottom: 0.75rem;
+        }
+
+        .docs-endpoint .method { color: #86efac; font-weight: 600; }
+        .docs-endpoint .path   { color: var(--accent-light); }
+        .docs-endpoint .param  { color: #fde68a; }
+        .docs-endpoint .note   { color: #4d7a6e; }
+
+        .cmd-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .cmd-table th {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.78rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cmd-table td {
+            padding: 0.6rem 0.75rem;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(31, 61, 31, 0.5);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .cmd-table td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-light);
+            white-space: nowrap;
+        }
+
+        .cmd-table tr:last-child td { border-bottom: none; }
+
+        .rule-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .rule-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+        }
+
+        .rule-item code {
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .rule-item p {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* Demo conversation */
+        .demo-chat {
+            background: var(--bg-tg);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            overflow: hidden;
+            max-width: 520px;
+        }
+
+        .demo-topbar {
+            background: var(--bg-tg-bar);
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .demo-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), #22c55e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .demo-name { font-size: 0.875rem; font-weight: 600; }
+        .demo-sub  { font-size: 0.7rem; color: var(--accent-light); }
+
+        .demo-messages {
+            padding: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .demo-msg {
+            font-size: 0.8rem;
+            line-height: 1.55;
+            padding: 0.6rem 0.85rem;
+            border-radius: 12px;
+            max-width: 90%;
+        }
+
+        .demo-msg.bot {
+            background: var(--bg-tg-bubble);
+            border-radius: 12px 12px 12px 3px;
+            color: #e8e8e8;
+        }
+
+        .demo-msg.user {
+            background: #1a3a2a;
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 12px 12px 3px 12px;
+            color: #d4f5e8;
+            align-self: flex-end;
+        }
+
+        .demo-msg code {
+            font-size: 0.75em;
+            background: rgba(16,185,129,0.12);
+        }
+
+        .demo-msg .dm-label {
+            color: var(--accent-light);
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .demo-time {
+            font-size: 0.65rem;
+            color: #4d7a9e;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 600px) {
+            .rule-grid { grid-template-columns: 1fr; }
+            .demo-chat { max-width: 100%; }
+        }
+
         /* ── Footer ── */
         footer {
             padding: 2rem 0;
@@ -828,9 +1087,9 @@
                         <p>JSON is auto-indented in a code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, and <code>~~strikethrough~~</code> render natively.</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon">🔕</div>
-                        <h3>Alerting Rules</h3>
-                        <p>Filter noise with <code>/rules add keyword error</code>, <code>/rules add dedup 10</code>, <code>/rules add quiet 22 8</code>. All rules are AND conditions — full control, zero friction.</p>
+                        <div class="feature-icon">🎯</div>
+                        <h3>The Label Is the Logic</h3>
+                        <p>Fire <code>/send/KEY/ci-failed</code> only when CI fails. Fire <code>/send/KEY/payment-received</code> only on success. When you own the code, the label carries the signal — no backend rules needed.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
@@ -838,10 +1097,16 @@
                         <p>No SDK. No OAuth. No account. Your webhook URL is your only credential — paste it, POST to it, done. The Telegram bot is the entire control plane.</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon">🔑</div>
-                        <h3>Instant Key Regen</h3>
-                        <p>Send <code>/regen confirm</code> to invalidate your current key and get a new one immediately. All connected channels are notified with the new URL automatically.</p>
+                        <div class="feature-icon">📜</div>
+                        <h3>History &amp; Replay</h3>
+                        <p>Use <code>/history</code> to see your last 10 delivered pings with payload previews. Use <code>/replay 3</code> to re-dispatch any ping to all channels — perfect for recovering a missed alert or testing a rule change.</p>
                     </div>
+                </div>
+
+                <!-- Advanced note -->
+                <div class="advanced-strip">
+                    <span class="advanced-tag">Advanced</span>
+                    <p><strong>Alerting rules</strong> — for webhook sources you don't control (Grafana, Uptime Kuma, GitHub webhooks). Add keyword filters, dedup windows, quiet hours, or label whitelists from the bot with <code>/rules</code>. Rules are global per API key — see the docs section below for details.</p>
                 </div>
 
                 <!-- Specs -->
@@ -936,6 +1201,165 @@ requests.post(
 <span class="c-comment"># Or plain text</span>
 requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span class="c-val">"ETL pipeline finished"</span>)</pre></div>
                 </div>
+            </div>
+        </section>
+
+        <!-- ── Docs ── -->
+        <section style="padding-top: 0;">
+            <div class="container">
+                <details class="docs-collapsible">
+                    <summary class="docs-summary">
+                        📖 Full Documentation
+                        <span class="docs-summary-hint">API reference · bot commands · alerting rules · demo</span>
+                        <span class="docs-chevron">▸</span>
+                    </summary>
+
+                    <div class="docs-body">
+
+                        <!-- API Reference -->
+                        <div class="docs-section">
+                            <h3>API Reference</h3>
+                            <p>One endpoint. No authentication headers — the API key lives in the path.</p>
+
+                            <div class="docs-endpoint">
+<span class="method">POST</span> <span class="path">https://pinghook.dev/send/<span class="param">{api_key}</span></span>
+<span class="method">POST</span> <span class="path">https://pinghook.dev/send/<span class="param">{api_key}</span>/<span class="param">{label}</span></span>
+
+<span class="note"># Query params</span>
+<span class="param">?channel=telegram</span>   <span class="note"># send to one platform only (telegram | slack | discord)</span>
+
+<span class="note"># Response</span>
+{ "status": "success", "channels_notified": 2 }
+{ "status": "suppressed", "reason": "dedup" }
+{ "status": "failed", "channels_notified": 0 }
+                            </div>
+
+                            <p>The <span style="color:var(--accent-light);font-family:'JetBrains Mono',monospace;font-size:0.85em">label</span> is any URL path segment after your key — use slashes for hierarchy: <code>/send/KEY/github/ci/prod</code>. Max payload 100 KB. Supported <code>Content-Type</code>: <code>application/json</code> or plain text (or none).</p>
+                        </div>
+
+                        <!-- Bot Commands -->
+                        <div class="docs-section">
+                            <h3>Bot Commands</h3>
+                            <table class="cmd-table">
+                                <thead>
+                                    <tr>
+                                        <th>Command</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>/start</td><td>Create account and get your webhook URL</td></tr>
+                                    <tr><td>/mykey</td><td>Show your current webhook URL</td></tr>
+                                    <tr><td>/regen confirm</td><td>Invalidate current key, get a new one; all channels notified</td></tr>
+                                    <tr><td>/channels</td><td>List connected delivery channels</td></tr>
+                                    <tr><td>/connect slack &lt;url&gt;</td><td>Add a Slack Incoming Webhook URL</td></tr>
+                                    <tr><td>/connect discord &lt;url&gt;</td><td>Add a Discord webhook URL</td></tr>
+                                    <tr><td>/disconnect &lt;n&gt;</td><td>Remove channel by number from /channels</td></tr>
+                                    <tr><td>/rules</td><td>List active alerting rules</td></tr>
+                                    <tr><td>/rules add …</td><td>Add a rule (see Alerting Rules below)</td></tr>
+                                    <tr><td>/rules remove &lt;n&gt;</td><td>Remove rule by number</td></tr>
+                                    <tr><td>/rules clear confirm</td><td>Remove all rules</td></tr>
+                                    <tr><td>/usage</td><td>Ping stats — today, this week, all time</td></tr>
+                                    <tr><td>/history</td><td>Last 10 successfully delivered pings with payload preview</td></tr>
+                                    <tr><td>/replay &lt;n&gt;</td><td>Re-dispatch ping #n from /history to all channels</td></tr>
+                                    <tr><td>/help</td><td>Show command list</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Alerting Rules -->
+                        <div class="docs-section">
+                            <h3>Alerting Rules <span style="font-size:0.75em;font-weight:500;color:var(--text-muted);text-transform:none;letter-spacing:0">(Advanced)</span></h3>
+                            <p>Rules are AND conditions — a ping is delivered only when every active rule passes. Add multiple rules to compose filters.</p>
+                            <p><strong>When do you need rules?</strong> Only for webhook sources you don't control — Grafana alerts, Uptime Kuma, GitHub webhooks, third-party SaaS. If you're writing the code that fires the webhook, use a conditional in your code and pick a specific label instead. That's simpler and more flexible.</p>
+
+                            <div class="rule-grid">
+                                <div class="rule-item">
+                                    <code>/rules add keyword error</code>
+                                    <p>Only deliver if the payload contains "error" (case-insensitive).</p>
+                                </div>
+                                <div class="rule-item">
+                                    <code>/rules add dedup 30</code>
+                                    <p>Suppress the same label if it was delivered in the last 30 minutes.</p>
+                                </div>
+                                <div class="rule-item">
+                                    <code>/rules add quiet 23 7</code>
+                                    <p>No pings between 23:00 and 07:00 UTC. Supports overnight windows.</p>
+                                </div>
+                                <div class="rule-item">
+                                    <code>/rules add labels ci deploy</code>
+                                    <p>Only deliver pings whose label is "ci" or "deploy" — ignore everything else.</p>
+                                </div>
+                            </div>
+
+                            <p style="margin-top:1rem;padding:0.85rem 1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;color:var(--text-muted);">
+                                ⚠️ Rules are global per API key. If you have multiple uncontrolled webhook sources (e.g. Grafana + GitHub) with conflicting rule needs, multi-key support is coming in a future update. For now, use labels to distinguish sources and keep rules simple.
+                            </p>
+                        </div>
+
+                        <!-- Demo Conversation -->
+                        <div class="docs-section">
+                            <h3>Demo — From Zero to Notified</h3>
+                            <p>What a first session looks like in Telegram.</p>
+
+                            <div class="demo-chat">
+                                <div class="demo-topbar">
+                                    <div class="demo-avatar">🪝</div>
+                                    <div>
+                                        <div class="demo-name">PingHookBot</div>
+                                        <div class="demo-sub">bot</div>
+                                    </div>
+                                </div>
+                                <div class="demo-messages">
+                                    <div class="demo-msg user">/start</div>
+                                    <div class="demo-msg bot">
+                                        👋 <strong>Welcome to PingHook!</strong><br><br>
+                                        Your webhook URL:<br>
+                                        <code>https://pinghook.dev/send/abc123…/your-label</code><br><br>
+                                        Quick test — paste in terminal:<br>
+                                        <code>curl -X POST …/test -d "Hello!"</code>
+                                        <div class="demo-time">14:00</div>
+                                    </div>
+
+                                    <div class="demo-msg bot">
+                                        <div class="dm-label">🔔 [test]</div>
+                                        Hello!
+                                        <div class="demo-time">14:00</div>
+                                    </div>
+
+                                    <div class="demo-msg user">/rules add dedup 10</div>
+                                    <div class="demo-msg bot">
+                                        ✅ Added: suppress same label repeated within 10 min
+                                        <div class="demo-time">14:01</div>
+                                    </div>
+
+                                    <div class="demo-msg user">/connect slack https://hooks.slack.com/…</div>
+                                    <div class="demo-msg bot">
+                                        ✅ Slack channel connected and test ping sent.
+                                        <div class="demo-time">14:02</div>
+                                    </div>
+
+                                    <div class="demo-msg user">/history</div>
+                                    <div class="demo-msg bot">
+                                        📜 <strong>Last deliveries:</strong><br><br>
+                                        1. <strong>test</strong> — 2 min ago<br>
+                                        &nbsp;&nbsp;&nbsp;<code>Hello!</code>
+                                        <div class="demo-time">14:02</div>
+                                    </div>
+
+                                    <div class="demo-msg user">/replay 1</div>
+                                    <div class="demo-msg bot">
+                                        🔁 Replayed ping #1 (2 min ago)<br>
+                                        Label: test<br>
+                                        Delivered to 2/2 channel(s).
+                                        <div class="demo-time">14:02</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
             </div>
         </section>
 

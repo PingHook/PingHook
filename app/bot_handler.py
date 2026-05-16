@@ -1,3 +1,4 @@
+import html
 import logging
 import secrets
 
@@ -13,9 +14,11 @@ from app.database import (
     clear_rules,
     update_api_key,
     get_usage_stats,
+    get_recent_webhooks,
 )
 from app.dispatcher import validate_and_save_webhook, dispatch
 from app.rules import format_rule
+from app.utils import relative_time
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +33,8 @@ HELP_TEXT = (
     "/disconnect &lt;n&gt; — remove a channel\n"
     "/rules — manage alerting rules\n"
     "/usage — view ping stats\n"
+    "/history — last 10 delivered pings\n"
+    "/replay &lt;n&gt; — re-send ping #n\n"
     "/help — this message"
 )
 
@@ -87,9 +92,23 @@ async def handle_message(
             f"👋 <b>Welcome to PingHook!</b>\n\n"
             f"Your webhook URL:\n"
             f"<code>{url}/your-label</code>\n\n"
-            f"POST to that URL from anywhere — CI, cron jobs, scripts.\n"
-            f"The label after your key describes the notification.\n\n"
-            f"Type /help to see all commands."
+            f"<b>The label is the signal.</b>\n"
+            f"Append it to describe what happened — your code decides when to fire:\n"
+            f"<code>{url}/ci-failed</code>\n"
+            f"<code>{url}/grafana-alert</code>\n"
+            f"<code>{url}/payment-received</code>\n\n"
+            f"<b>Quick test:</b>\n"
+            f"<code>curl -X POST {url}/test -d \"Hello!\"</code>\n\n"
+            f"──────────────────\n"
+            f"<b>Fan out to Slack or Discord:</b>\n"
+            f"/connect slack &lt;webhook-url&gt;\n"
+            f"/connect discord &lt;webhook-url&gt;\n\n"
+            f"<b>History &amp; replay:</b>\n"
+            f"/history · /replay 1\n\n"
+            f"<b>Advanced:</b> /rules — filter noise from sources you don't control\n"
+            f"(Grafana, Uptime Kuma, GitHub webhooks)\n\n"
+            f"/help — all commands\n\n"
+            f"🌐 <a href=\"https://pinghook.dev\">pinghook.dev</a> — docs, examples &amp; more"
         )
         return
 
@@ -178,6 +197,53 @@ async def handle_message(
             f"This week: {stats['this_week']} pings\n"
             f"All time: {stats['total']} pings\n"
             f"Last ping: {stats['last_ping_ago']} — label: {stats['last_label']}"
+        )
+
+    elif command == "/history":
+        webhooks = await get_recent_webhooks(user["api_key"])
+        if not webhooks:
+            await send_reply("No successful pings yet.")
+            return
+        lines = []
+        for i, w in enumerate(webhooks, 1):
+            label   = w.get("label") or "(no label)"
+            age     = relative_time(w["created_at"])
+            preview = (w.get("payload") or "")[:60].replace("\n", " ")
+            preview = html.escape(preview)
+            if preview:
+                lines.append(f"{i}. <b>{html.escape(label)}</b> — {age}\n   <code>{preview}</code>")
+            else:
+                lines.append(f"{i}. <b>{html.escape(label)}</b> — {age}")
+        await send_reply("📜 <b>Last deliveries:</b>\n\n" + "\n\n".join(lines))
+
+    elif command == "/replay":
+        if not args:
+            await send_reply("Usage: /replay &lt;number from /history&gt;")
+            return
+        try:
+            n = int(args[0])
+            if n < 1:
+                raise ValueError
+        except ValueError:
+            await send_reply("Usage: /replay &lt;number from /history&gt;")
+            return
+        webhooks = await get_recent_webhooks(user["api_key"])
+        if n > len(webhooks):
+            await send_reply(f"Only {len(webhooks)} entries in history. Use /history to see them.")
+            return
+        entry    = webhooks[n - 1]
+        payload  = entry.get("payload") or ""
+        label    = entry.get("label") or ""
+        channels = await get_channels(user["id"])
+        ok_count = 0
+        for ch in channels:
+            if await dispatch(ch, label, payload):
+                ok_count += 1
+        age = relative_time(entry["created_at"])
+        await send_reply(
+            f"🔁 Replayed ping #{n} ({age})\n"
+            f"Label: {html.escape(label) or '(none)'}\n"
+            f"Delivered to {ok_count}/{len(channels)} channel(s)."
         )
 
     elif command == "/help":

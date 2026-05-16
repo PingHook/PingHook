@@ -98,19 +98,19 @@ async def _handle_send(
             detail={"error": "Account inactive", "code": "INACTIVE"},
         )
 
+    payload = raw_body.decode("utf-8", errors="replace")
+
     allowed, resets_in = await check_rate_limit(api_key)
     if not allowed:
-        await log_usage(api_key, label, len(raw_body), "rate_limited", None, 0)
+        await log_usage(api_key, label, len(raw_body), "rate_limited", None, 0, payload)
         raise HTTPException(
             status_code=429,
             detail={"error": "Rate limit exceeded", "resets_in": resets_in},
         )
 
-    payload = raw_body.decode("utf-8", errors="replace")
-
     passed, suppressed_by = await passes_alerting_rules(user["id"], label, payload)
     if not passed:
-        await log_usage(api_key, label, len(raw_body), "suppressed", suppressed_by, 0)
+        await log_usage(api_key, label, len(raw_body), "suppressed", suppressed_by, 0, payload)
         return {"status": "suppressed", "reason": suppressed_by}
 
     channels = await get_channels(user["id"])
@@ -127,7 +127,7 @@ async def _handle_send(
         await update_dedup_log(user["id"], label)
 
     status = "success" if success_count > 0 else "failed"
-    await log_usage(api_key, label, len(raw_body), status, None, success_count)
+    await log_usage(api_key, label, len(raw_body), status, None, success_count, payload)
 
     return {"status": status, "channels_notified": success_count}
 

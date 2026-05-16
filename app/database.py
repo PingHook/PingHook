@@ -372,6 +372,7 @@ async def log_usage(
     status: str,
     suppressed_by: str | None,
     channels_notified: int,
+    payload: str | None = None,
 ):
     def _insert():
         return supabase.table("usage_logs").insert({
@@ -381,12 +382,33 @@ async def log_usage(
             "status":            status,
             "suppressed_by":     suppressed_by,
             "channels_notified": channels_notified,
+            "payload":           payload,
         }).execute()
 
     try:
         await asyncio.to_thread(_insert)
     except Exception as e:
         logger.error(f"[DB] log_usage failed: {e}")
+
+
+async def get_recent_webhooks(api_key: str, limit: int = 10) -> list[dict]:
+    def _query():
+        return (
+            supabase.table("usage_logs")
+            .select("id,label,payload,created_at,channels_notified")
+            .eq("api_key", api_key)
+            .eq("status", "success")
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+
+    try:
+        resp = await asyncio.to_thread(_query)
+        return resp.data or []
+    except Exception as e:
+        logger.error(f"[DB] get_recent_webhooks failed: {e}")
+        return []
 
 
 async def get_usage_stats(api_key: str) -> dict:

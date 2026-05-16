@@ -64,6 +64,7 @@ create table public.usage_logs (
   api_key           text not null,
   label             text not null default '',
   payload_size      integer not null default 0,
+  payload           text,            -- raw request body (for /history and /replay)
   status            text not null,   -- 'success' | 'failed' | 'rate_limited' | 'suppressed'
   suppressed_by     text,            -- rule_type that triggered suppression
   channels_notified integer not null default 0,
@@ -92,6 +93,9 @@ create table public.dedup_log (
   primary key (user_id, label)
 );
 alter table public.dedup_log enable row level security;
+
+-- ── Migration (run this if V4 schema is already applied) ─────────────────────
+-- alter table public.usage_logs add column if not exists payload text;
 
 -- ── Atomic rate-limit counter increment ───────────────────────────────────────
 create or replace function increment_rate_counters(p_api_key text)
