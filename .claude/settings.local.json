@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python -c \"import pytest; print\\(pytest.__version__\\)\")",
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_utils.py -v)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_utils.py tests/test_api.py -v)",
+      "Bash(.venv/Scripts/python -c \"import starlette; print\\(starlette.__version__\\); import httpx; print\\(httpx.__version__\\)\")",
+      "Bash(.venv/Scripts/python -m pytest tests/ -v)",
+      "Bash(.venv/Scripts/python -m pytest tests/ -q)"
+    ]
+  }
+}

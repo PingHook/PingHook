@@ -288,21 +288,6 @@ async def _handle_rules(user: dict, args: list, send_reply):
             await add_rule(user["id"], "dedup", {"window_minutes": minutes})
             await send_reply(f"✅ Added: suppress same label repeated within {minutes} min")
 
-        elif rule_type == "quiet" and len(rule_args) >= 2:
-            try:
-                start, end = int(rule_args[0]), int(rule_args[1])
-            except ValueError:
-                await send_reply("Usage: /rules add quiet &lt;start_hour&gt; &lt;end_hour&gt;")
-                return
-            if not (0 <= start <= 23 and 0 <= end <= 23):
-                await send_reply("Hours must be 0–23 (24-hour UTC).")
-                return
-            await add_rule(user["id"], "quiet_hours", {"start_hour": start, "end_hour": end})
-            await send_reply(
-                f"✅ Added: no pings between {start}:00 and {end}:00\n"
-                f"<i>Times are in UTC. Example: /rules add quiet 17 2 = 10pm–8am IST</i>"
-            )
-
         elif rule_type == "labels" and rule_args:
             await add_rule(user["id"], "label_filter", {"labels": rule_args})
             await send_reply(f"✅ Added: only notify for: {', '.join(rule_args)}")
@@ -312,7 +297,6 @@ async def _handle_rules(user: dict, args: list, send_reply):
                 "Usage:\n"
                 "/rules add keyword &lt;word&gt;\n"
                 "/rules add dedup &lt;minutes&gt;\n"
-                "/rules add quiet &lt;start_hour&gt; &lt;end_hour&gt;\n"
                 "/rules add labels &lt;label1&gt; &lt;label2&gt; ..."
             )
 

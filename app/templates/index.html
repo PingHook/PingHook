@@ -1106,7 +1106,7 @@
                 <!-- Advanced note -->
                 <div class="advanced-strip">
                     <span class="advanced-tag">Advanced</span>
-                    <p><strong>Alerting rules</strong> — for webhook sources you don't control (Grafana, Uptime Kuma, GitHub webhooks). Add keyword filters, dedup windows, quiet hours, or label whitelists from the bot with <code>/rules</code>. Rules are global per API key — see the docs section below for details.</p>
+                    <p><strong>Filtering &amp; rules</strong> — three layers: inline <code>pinghook_rules</code> in your JSON body, query params (<code>?if=</code>, <code>?textif=</code>, <code>?dedup=</code>, <code>?channel=</code>, <code>?silent=</code>), or global bot rules via <code>/rules</code> for sources you can't touch at all. See the docs section below.</p>
                 </div>
 
                 <!-- Specs -->
@@ -1225,53 +1225,94 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
 <span class="method">POST</span> <span class="path">https://pinghook.dev/send/<span class="param">{api_key}</span></span>
 <span class="method">POST</span> <span class="path">https://pinghook.dev/send/<span class="param">{api_key}</span>/<span class="param">{label}</span></span>
 
-<span class="note"># Query params</span>
-<span class="param">?channel=telegram</span>   <span class="note"># send to one platform only (telegram | slack | discord)</span>
-
 <span class="note"># Response</span>
 { "status": "success", "channels_notified": 2 }
 { "status": "suppressed", "reason": "dedup" }
 { "status": "failed", "channels_notified": 0 }
                             </div>
 
-                            <p>The <span style="color:var(--accent-light);font-family:'JetBrains Mono',monospace;font-size:0.85em">label</span> is any URL path segment after your key — use slashes for hierarchy: <code>/send/KEY/github/ci/prod</code>. Max payload 100 KB. Supported <code>Content-Type</code>: <code>application/json</code> or plain text (or none).</p>
+                            <p>The <span style="color:var(--accent-light);font-family:'JetBrains Mono',monospace;font-size:0.85em">label</span> is any URL path segment after your key — use slashes for hierarchy: <code>/send/KEY/github/ci/prod</code>. Max payload 100 KB.</p>
                         </div>
 
-                        <!-- Bot Commands -->
+                        <!-- Layer 1: Inline Rules -->
                         <div class="docs-section">
-                            <h3>Bot Commands</h3>
-                            <table class="cmd-table">
-                                <thead>
-                                    <tr>
-                                        <th>Command</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
+                            <h3>Layer 1 — Inline Rules <span style="font-size:0.75em;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">highest priority · for sources you own</span></h3>
+                            <p>Add a <code>pinghook_rules</code> key to any JSON body. PingHook strips it before delivery — your recipients never see it. Conditions evaluate against the rest of your payload.</p>
+
+                            <div class="docs-endpoint">
+<span class="note"># Only deliver when errors &gt; 10 AND branch is main</span>
+{
+  "event": "ci-run",
+  "branch": "main",
+  "errors": 14,
+  "pinghook_rules": {
+    "conditions": [
+      { "field": "errors", "operator": "gt", "value": 10 },
+      { "field": "branch", "operator": "eq", "value": "main" }
+    ],
+    "logic": "AND",
+    "dedup": 30,
+    "channel": "slack"
+  }
+}
+                            </div>
+
+                            <p>Dot notation for nested fields: <code>"field": "errors.critical.count"</code></p>
+
+                            <table class="cmd-table" style="margin-top:0.75rem;">
+                                <thead><tr><th>Operator</th><th>Meaning</th></tr></thead>
                                 <tbody>
-                                    <tr><td>/start</td><td>Create account and get your webhook URL</td></tr>
-                                    <tr><td>/mykey</td><td>Show your current webhook URL</td></tr>
-                                    <tr><td>/regen confirm</td><td>Invalidate current key, get a new one; all channels notified</td></tr>
-                                    <tr><td>/channels</td><td>List connected delivery channels</td></tr>
-                                    <tr><td>/connect slack &lt;url&gt;</td><td>Add a Slack Incoming Webhook URL</td></tr>
-                                    <tr><td>/connect discord &lt;url&gt;</td><td>Add a Discord webhook URL</td></tr>
-                                    <tr><td>/disconnect &lt;n&gt;</td><td>Remove channel by number from /channels</td></tr>
-                                    <tr><td>/rules</td><td>List active alerting rules</td></tr>
-                                    <tr><td>/rules add …</td><td>Add a rule (see Alerting Rules below)</td></tr>
-                                    <tr><td>/rules remove &lt;n&gt;</td><td>Remove rule by number</td></tr>
-                                    <tr><td>/rules clear confirm</td><td>Remove all rules</td></tr>
-                                    <tr><td>/usage</td><td>Ping stats — today, this week, all time</td></tr>
-                                    <tr><td>/history</td><td>Last 10 successfully delivered pings with payload preview</td></tr>
-                                    <tr><td>/replay &lt;n&gt;</td><td>Re-dispatch ping #n from /history to all channels</td></tr>
-                                    <tr><td>/help</td><td>Show command list</td></tr>
+                                    <tr><td>eq / neq</td><td>Equals / not equals</td></tr>
+                                    <tr><td>gt / lt / gte / lte</td><td>Numeric comparisons</td></tr>
+                                    <tr><td>contains</td><td>String contains (case-insensitive)</td></tr>
+                                    <tr><td>exists</td><td>Field is present in payload</td></tr>
+                                </tbody>
+                            </table>
+
+                            <p style="margin-top:0.75rem;font-size:0.85rem;color:var(--text-muted);">Shorthand keys inside <code>pinghook_rules</code>: <code>dedup</code> (minutes) and <code>channel</code> (telegram | slack | discord). Both override query param values for that request.</p>
+                        </div>
+
+                        <!-- Layer 2: Query Param Rules -->
+                        <div class="docs-section">
+                            <h3>Layer 2 — Query Param Rules <span style="font-size:0.75em;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">per-request · works for any source</span></h3>
+                            <p>Append params to the URL — no body changes needed. Works for sources you don't control as long as you can customise the webhook URL (Grafana, Uptime Kuma, most SaaS).</p>
+
+                            <div class="docs-endpoint">
+<span class="note"># Route to one platform</span>
+curl "pinghook.dev/send/<span class="param">KEY</span>/deploy<span class="param">?channel=slack</span>" -d "done"
+
+<span class="note"># Suppress repeats for 30 min</span>
+curl "pinghook.dev/send/<span class="param">KEY</span>/deploy<span class="param">?dedup=30</span>" -d "done"
+
+<span class="note"># Log but don't deliver — dry run</span>
+curl "pinghook.dev/send/<span class="param">KEY</span>/deploy<span class="param">?silent=1</span>" -d "test"
+
+<span class="note"># JSON field condition (repeatable → AND)</span>
+curl "pinghook.dev/send/<span class="param">KEY</span>/grafana<span class="param">?if=status:eq:firing&amp;if=labels.env:eq:prod</span>"
+
+<span class="note"># Text body contains (repeatable → AND, case-insensitive)</span>
+curl "pinghook.dev/send/<span class="param">KEY</span>/logs<span class="param">?textif=error&amp;textif=critical</span>" -d "critical error in payments"
+
+<span class="note"># Combine anything</span>
+curl "pinghook.dev/send/<span class="param">KEY</span>/grafana<span class="param">?if=status:eq:firing&amp;channel=telegram&amp;dedup=5</span>"
+                            </div>
+
+                            <table class="cmd-table" style="margin-top:0.75rem;">
+                                <thead><tr><th>Param</th><th>Value</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td>?channel=</td><td>telegram | slack | discord</td><td>Route to one platform only</td></tr>
+                                    <tr><td>?dedup=</td><td>minutes (integer)</td><td>Suppress same label within N minutes</td></tr>
+                                    <tr><td>?silent=</td><td>1</td><td>Log but don't deliver — for testing</td></tr>
+                                    <tr><td>?if=</td><td>field:operator:value</td><td>JSON field condition, repeatable (AND). Fail closed on non-JSON body.</td></tr>
+                                    <tr><td>?textif=</td><td>word</td><td>Raw body string contains, repeatable (AND), case-insensitive</td></tr>
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Alerting Rules -->
+                        <!-- Layer 3: Global Bot Rules -->
                         <div class="docs-section">
-                            <h3>Alerting Rules <span style="font-size:0.75em;font-weight:500;color:var(--text-muted);text-transform:none;letter-spacing:0">(Advanced)</span></h3>
-                            <p>Rules are AND conditions — a ping is delivered only when every active rule passes. Add multiple rules to compose filters.</p>
-                            <p><strong>When do you need rules?</strong> Only for webhook sources you don't control — Grafana alerts, Uptime Kuma, GitHub webhooks, third-party SaaS. If you're writing the code that fires the webhook, use a conditional in your code and pick a specific label instead. That's simpler and more flexible.</p>
+                            <h3>Layer 3 — Global Bot Rules <span style="font-size:0.75em;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">fallback · for sources you can't touch at all</span></h3>
+                            <p>Configured once in the Telegram bot. Applies to every ping that reaches your URL — use when you can't modify the body or the URL (some SaaS webhook integrations are completely fixed).</p>
 
                             <div class="rule-grid">
                                 <div class="rule-item">
@@ -1280,20 +1321,20 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
                                 </div>
                                 <div class="rule-item">
                                     <code>/rules add dedup 30</code>
-                                    <p>Suppress the same label if it was delivered in the last 30 minutes.</p>
-                                </div>
-                                <div class="rule-item">
-                                    <code>/rules add quiet 23 7</code>
-                                    <p>No pings between 23:00 and 07:00 UTC. Supports overnight windows.</p>
+                                    <p>Suppress the same label if delivered in the last 30 minutes.</p>
                                 </div>
                                 <div class="rule-item">
                                     <code>/rules add labels ci deploy</code>
-                                    <p>Only deliver pings whose label is "ci" or "deploy" — ignore everything else.</p>
+                                    <p>Only deliver pings whose label is "ci" or "deploy".</p>
+                                </div>
+                                <div class="rule-item">
+                                    <code>/rules remove 2</code>
+                                    <p>Remove rule #2 from /rules list. <code>/rules clear confirm</code> removes all.</p>
                                 </div>
                             </div>
 
                             <p style="margin-top:1rem;padding:0.85rem 1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;color:var(--text-muted);">
-                                ⚠️ Rules are global per API key. If you have multiple uncontrolled webhook sources (e.g. Grafana + GitHub) with conflicting rule needs, multi-key support is coming in a future update. For now, use labels to distinguish sources and keep rules simple.
+                                ⚠️ Global rules apply to every ping on your key. If you have multiple uncontrolled sources with conflicting needs, use query params on each URL instead — or keep global rules simple. Multi-key support is coming in a future update.
                             </p>
                         </div>
 
@@ -1384,8 +1425,8 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
                         <p>JSON is auto-indented in a monospace code block. Plain text supports Markdown — <code>**bold**</code>, <code>_italic_</code>, and <code>~~strikethrough~~</code> all render natively in Telegram. Both formats support labels.</p>
                     </div>
                     <div class="faq-item">
-                        <h3>How do alerting rules work?</h3>
-                        <p>Rules are AND conditions — a ping is delivered only if all active rules pass. Use <code>/rules add keyword error</code> to filter by content, <code>/rules add dedup 10</code> to suppress the same label within 10 minutes, <code>/rules add quiet 22 8</code> for overnight silence, or <code>/rules add labels ci-failed deploy-prod</code> to whitelist specific labels.</p>
+                        <h3>How do filtering and alerting rules work?</h3>
+                        <p>PingHook has three layers. <strong>Layer 1:</strong> add a <code>pinghook_rules</code> key to your JSON body with conditions, logic, dedup, and channel — evaluated against your payload fields, stripped before delivery. <strong>Layer 2:</strong> append <code>?if=</code>, <code>?textif=</code>, <code>?dedup=</code>, <code>?channel=</code>, or <code>?silent=</code> to the URL — works for any source without touching the body. <strong>Layer 3:</strong> global bot rules via <code>/rules add keyword</code>, <code>/rules add dedup</code>, <code>/rules add labels</code> — fallback for sources you can't touch at all. More specific layers take full priority.</p>
                     </div>
                     <div class="faq-item">
                         <h3>What if someone gets my webhook URL?</h3>

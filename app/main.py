@@ -1,3 +1,4 @@
+import json
 import logging
 from contextlib import asynccontextmanager
 from typing import Optional
@@ -14,6 +15,7 @@ from app.database import (
     get_channels,
     log_usage,
     update_dedup_log,
+    check_dedup_window,
     count_active_users,
     count_pings_today,
     count_all_pings,
@@ -21,7 +23,12 @@ from app.database import (
 )
 from app.dispatcher import dispatch
 from app.rate_limiter import check_rate_limit
-from app.rules import passes_alerting_rules
+from app.rules import (
+    passes_global_rules,
+    evaluate_conditions,
+    evaluate_if_params,
+    evaluate_textif_params,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,13 +39,13 @@ MAX_BODY_SIZE = 100_000  # 100 KB
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("PingHook V4 starting up...")
+    logger.info("PingHook starting up...")
     yield
     logger.info("Shutting down...")
     await bot.session.close()
 
 
-app = FastAPI(title="PingHook", version="4.0.0", lifespan=lifespan)
+app = FastAPI(title="PingHook", version="4.1.0", lifespan=lifespan)
 
 
 # ── Landing page ──────────────────────────────────────────────────────────────
@@ -71,14 +78,100 @@ async def telegram_webhook(request: Request):
     return {"ok": True}
 
 
+# ── Rules resolver ────────────────────────────────────────────────────────────
+
+async def _resolve_rules(
+    user_id: str,
+    label: str,
+    raw_body: bytes,
+    qp,  # request.query_params
+) -> tuple[bool, str | None, str, dict]:
+    """
+    Returns (should_deliver, suppressed_reason, payload_to_deliver, delivery_options).
+    delivery_options keys: channel, dedup, silent.
+
+    Layer 1 — pinghook_rules in JSON body  (highest priority)
+    Layer 2 — ?if= / ?textif= / ?dedup=   (per-request overrides)
+    Layer 3 — global bot rules             (fallback)
+    """
+    delivery_options = {
+        "channel": qp.get("channel"),
+        "dedup":   int(qp["dedup"]) if qp.get("dedup", "").isdigit() else None,
+        "silent":  qp.get("silent", "0") in ("1", "true", "yes"),
+    }
+
+    # Try to parse body as JSON
+    body_json = None
+    try:
+        body_json = json.loads(raw_body)
+    except Exception:
+        pass
+
+    # ── Layer 1: pinghook_rules ───────────────────────────────────────────────
+    if isinstance(body_json, dict) and "pinghook_rules" in body_json:
+        ph = body_json["pinghook_rules"]
+
+        # pinghook_rules keys take priority over query params
+        if "channel" in ph:
+            delivery_options["channel"] = ph["channel"]
+        if "dedup" in ph:
+            delivery_options["dedup"] = int(ph["dedup"])
+
+        # Strip pinghook_rules from delivered payload
+        payload_dict = {k: v for k, v in body_json.items() if k != "pinghook_rules"}
+        payload_str  = json.dumps(payload_dict, indent=2) if payload_dict else ""
+
+        # Evaluate conditions against the clean payload dict
+        if "conditions" in ph:
+            passed = evaluate_conditions(
+                ph["conditions"],
+                ph.get("logic", "AND"),
+                payload_dict,
+            )
+            if not passed:
+                return False, "pinghook_rules", "", delivery_options
+
+        # Layer 1 dedup check
+        if delivery_options["dedup"]:
+            if await check_dedup_window(user_id, label, delivery_options["dedup"]):
+                return False, "dedup", "", delivery_options
+
+        return True, None, payload_str, delivery_options
+
+    # Plain text payload (Layers 2 and 3)
+    payload_str = raw_body.decode("utf-8", errors="replace")
+
+    # ── Layer 2: query param filters ──────────────────────────────────────────
+    if_params     = qp.getlist("if")
+    textif_params = qp.getlist("textif")
+
+    if if_params:
+        if body_json is None:
+            # ?if= on a non-JSON body — fail closed
+            return False, "query_if_unevaluable", payload_str, delivery_options
+        if not evaluate_if_params(if_params, body_json):
+            return False, "query_if_condition", payload_str, delivery_options
+
+    if textif_params:
+        if not evaluate_textif_params(textif_params, payload_str):
+            return False, "query_textif_condition", payload_str, delivery_options
+
+    # Layer 2 dedup check
+    if delivery_options["dedup"]:
+        if await check_dedup_window(user_id, label, delivery_options["dedup"]):
+            return False, "dedup", payload_str, delivery_options
+
+    # ── Layer 3: global bot rules ─────────────────────────────────────────────
+    passed, reason = await passes_global_rules(user_id, label, payload_str)
+    if not passed:
+        return False, reason, payload_str, delivery_options
+
+    return True, None, payload_str, delivery_options
+
+
 # ── Core send handler ─────────────────────────────────────────────────────────
 
-async def _handle_send(
-    request: Request,
-    api_key: str,
-    label: str,
-    channel_filter: Optional[str] = None,
-):
+async def _handle_send(request: Request, api_key: str, label: str):
     raw_body = await request.body()
     if len(raw_body) > MAX_BODY_SIZE:
         raise HTTPException(
@@ -98,58 +191,53 @@ async def _handle_send(
             detail={"error": "Account inactive", "code": "INACTIVE"},
         )
 
-    payload = raw_body.decode("utf-8", errors="replace")
-
     allowed, resets_in = await check_rate_limit(api_key)
     if not allowed:
-        await log_usage(api_key, label, len(raw_body), "rate_limited", None, 0, payload)
+        payload_str = raw_body.decode("utf-8", errors="replace")
+        await log_usage(api_key, label, len(raw_body), "rate_limited", None, 0, payload_str)
         raise HTTPException(
             status_code=429,
             detail={"error": "Rate limit exceeded", "resets_in": resets_in},
         )
 
-    passed, suppressed_by = await passes_alerting_rules(user["id"], label, payload)
-    if not passed:
-        await log_usage(api_key, label, len(raw_body), "suppressed", suppressed_by, 0, payload)
+    should_deliver, suppressed_by, payload_str, opts = await _resolve_rules(
+        user["id"], label, raw_body, request.query_params
+    )
+
+    if not should_deliver:
+        await log_usage(api_key, label, len(raw_body), "suppressed", suppressed_by, 0, payload_str or None)
         return {"status": "suppressed", "reason": suppressed_by}
 
+    if opts["silent"]:
+        await log_usage(api_key, label, len(raw_body), "suppressed", "silent", 0, payload_str)
+        return {"status": "suppressed", "reason": "silent"}
+
     channels = await get_channels(user["id"])
-    if channel_filter:
-        channels = [c for c in channels if c["type"] == channel_filter]
+    if opts["channel"]:
+        channels = [c for c in channels if c["type"] == opts["channel"]]
 
     success_count = 0
     for ch in channels:
-        ok = await dispatch(ch, label, payload)
-        if ok:
+        if await dispatch(ch, label, payload_str):
             success_count += 1
 
     if success_count > 0:
         await update_dedup_log(user["id"], label)
 
     status = "success" if success_count > 0 else "failed"
-    await log_usage(api_key, label, len(raw_body), status, None, success_count, payload)
+    await log_usage(api_key, label, len(raw_body), status, None, success_count, payload_str)
 
     return {"status": status, "channels_notified": success_count}
 
 
 @app.post("/send/{api_key}")
-async def send_no_label(
-    request: Request,
-    api_key: str,
-    channel: Optional[str] = Query(None),
-):
-    return await _handle_send(request, api_key, "", channel)
+async def send_no_label(request: Request, api_key: str):
+    return await _handle_send(request, api_key, "")
 
 
 @app.post("/send/{api_key}/{label:path}")
-async def send_labeled(
-    request: Request,
-    api_key: str,
-    label: str,
-    channel: Optional[str] = Query(None),
-):
-    label = label.strip("/")
-    return await _handle_send(request, api_key, label, channel)
+async def send_labeled(request: Request, api_key: str, label: str):
+    return await _handle_send(request, api_key, label.strip("/"))
 
 
 # ── Public stats ──────────────────────────────────────────────────────────────
@@ -166,9 +254,9 @@ async def admin_stats(admin_secret: str = Query(...)):
     if not settings.ADMIN_SECRET or admin_secret != settings.ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Forbidden")
     return {
-        "active_users_30d":    await count_active_users(30),
-        "active_users_7d":     await count_active_users(7),
-        "total_pings_today":   await count_pings_today(),
+        "active_users_30d":     await count_active_users(30),
+        "active_users_7d":      await count_active_users(7),
+        "total_pings_today":    await count_pings_today(),
         "total_pings_all_time": await count_all_pings(),
     }
 

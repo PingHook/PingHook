@@ -328,6 +328,15 @@ async def increment_rate_counters(api_key: str):
 
 # ── Dedup ─────────────────────────────────────────────────────────────────────
 
+async def check_dedup_window(user_id: str, label: str, window_minutes: int) -> bool:
+    """Returns True if label was successfully delivered within window_minutes."""
+    ts = await get_dedup_timestamp(user_id, label)
+    if ts is None:
+        return False
+    elapsed = (datetime.now(timezone.utc) - ts).total_seconds() / 60
+    return elapsed < window_minutes
+
+
 async def get_dedup_timestamp(user_id: str, label: str) -> datetime | None:
     def _query():
         return (
