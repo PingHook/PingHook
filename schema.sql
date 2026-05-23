@@ -9,10 +9,11 @@ drop table if exists public.users cascade;
 
 -- ── Users ────────────────────────────────────────────────────────────────────
 create table public.users (
-  id         uuid primary key default gen_random_uuid(),
-  api_key    text not null unique,
-  is_active  boolean not null default true,
-  created_at timestamptz not null default timezone('utc', now())
+  id           uuid primary key default gen_random_uuid(),
+  api_key      text not null unique,
+  is_active    boolean not null default true,
+  show_footer  boolean not null default true,   -- set false for paid users
+  created_at   timestamptz not null default timezone('utc', now())
 );
 create index users_api_key_idx on public.users (api_key);
 alter table public.users enable row level security;
@@ -94,8 +95,9 @@ create table public.dedup_log (
 );
 alter table public.dedup_log enable row level security;
 
--- ── Migration (run this if V4 schema is already applied) ─────────────────────
+-- ── Migration (run this if schema is already applied) ────────────────────────
 -- alter table public.usage_logs add column if not exists payload text;
+-- alter table public.users add column if not exists show_footer boolean not null default true;
 
 -- ── Atomic rate-limit counter increment ───────────────────────────────────────
 create or replace function increment_rate_counters(p_api_key text)

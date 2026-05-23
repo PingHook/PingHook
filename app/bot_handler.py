@@ -235,9 +235,10 @@ async def handle_message(
         payload  = entry.get("payload") or ""
         label    = entry.get("label") or ""
         channels = await get_channels(user["id"])
+        footer   = user.get("show_footer", True)
         ok_count = 0
         for ch in channels:
-            if await dispatch(ch, label, payload):
+            if await dispatch(ch, label, payload, footer):
                 ok_count += 1
         age = relative_time(entry["created_at"])
         await send_reply(

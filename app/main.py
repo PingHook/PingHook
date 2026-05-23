@@ -216,9 +216,10 @@ async def _handle_send(request: Request, api_key: str, label: str):
     if opts["channel"]:
         channels = [c for c in channels if c["type"] == opts["channel"]]
 
+    footer = user.get("show_footer", True)
     success_count = 0
     for ch in channels:
-        if await dispatch(ch, label, payload_str):
+        if await dispatch(ch, label, payload_str, footer):
             success_count += 1
 
     if success_count > 0:
