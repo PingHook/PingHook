@@ -872,6 +872,57 @@
             .demo-chat { max-width: 100%; }
         }
 
+        /* ── Docs CTA strip ── */
+        .docs-cta-strip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .docs-cta-strip h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .docs-cta-strip p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .docs-cta-btn {
+            flex-shrink: 0;
+            background: var(--bg-secondary);
+            color: var(--accent-light);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: border-color 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+
+        .docs-cta-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        @media (max-width: 600px) {
+            .docs-cta-strip {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
         /* ── Footer ── */
         footer {
             padding: 2rem 0;
@@ -1217,15 +1268,21 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
             </div>
         </section>
 
-        <!-- ── Docs ── -->
+        <!-- ── Docs CTA ── -->
         <section style="padding-top: 0;">
             <div class="container">
-                <details class="docs-collapsible">
-                    <summary class="docs-summary">
-                        📖 Documentation
-                        <span class="docs-summary-hint">API reference · bot commands · alerting rules · <a href="/docs" onclick="event.stopPropagation()" style="color:var(--accent-light);text-decoration:none;">full docs ↗</a></span>
-                        <span class="docs-chevron">▸</span>
-                    </summary>
+                <div class="docs-cta-strip">
+                    <div>
+                        <h3>Everything documented, nothing hidden</h3>
+                        <p>API reference · bot commands · integration guides for Grafana, GitHub Actions, Uptime Kuma, n8n, Python, cron jobs · self-hosting.</p>
+                    </div>
+                    <a href="/docs" class="docs-cta-btn">Explore the Docs →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- old collapsible docs removed — see /docs for full documentation -->
+        <section style="display:none;"><div><details><summary></summary>
 
                     <div class="docs-body">
 

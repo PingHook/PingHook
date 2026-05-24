@@ -1,5 +1,7 @@
 import json
 import logging
+import os
+import re
 from contextlib import asynccontextmanager
 from typing import Optional
 
@@ -252,20 +254,27 @@ async def send_labeled(request: Request, api_key: str, label: str):
 
 @app.get("/docs", response_class=HTMLResponse)
 async def docs_page(request: Request):
-    return templates.TemplateResponse("docs.html", {"request": request})
+    # Served as raw HTML — bypasses Jinja2 so {{ }} in code examples aren't evaluated
+    with open("app/templates/docs.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 
 @app.get("/blog", response_class=HTMLResponse)
 async def blog_page(request: Request):
-    return templates.TemplateResponse("blog.html", {"request": request})
+    with open("app/templates/blog.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 
 @app.get("/blog/{slug}", response_class=HTMLResponse)
 async def blog_post(request: Request, slug: str):
-    try:
-        return templates.TemplateResponse(f"blog/{slug}.html", {"request": request})
-    except Exception:
+    # Sanitise slug — only lowercase letters, digits, hyphens
+    if not re.match(r"^[a-z0-9-]+$", slug):
         raise HTTPException(status_code=404, detail="Post not found")
+    path = f"app/templates/blog/{slug}.html"
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Post not found")
+    with open(path, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 
 # ── Public stats ──────────────────────────────────────────────────────────────
