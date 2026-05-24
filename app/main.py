@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Optional
 
 from fastapi import FastAPI, Request, HTTPException, Query
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from app.bot import bot
@@ -294,6 +294,32 @@ async def user_stats(api_key: str, admin_secret: str = Query(...)):
     if not settings.ADMIN_SECRET or admin_secret != settings.ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Forbidden")
     return await get_usage_stats(api_key)
+
+
+# ── SEO ──────────────────────────────────────────────────────────────────────
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+async def robots():
+    return (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /admin/\n"
+        "Disallow: /send/\n"
+        "Disallow: /telegram/\n"
+        "Sitemap: https://pinghook.dev/sitemap.xml\n"
+    )
+
+
+@app.get("/sitemap.xml")
+async def sitemap():
+    content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://pinghook.dev/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://pinghook.dev/docs</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pinghook.dev/blog</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://pinghook.dev/blog/grafana-integration</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>"""
+    return Response(content=content, media_type="application/xml")
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
