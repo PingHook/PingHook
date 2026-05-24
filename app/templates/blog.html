@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog — PingHook</title>
+    <meta name="description" content="Guides, integration tutorials, and tips for PingHook — webhooks to Telegram, Slack, and Discord without the overhead.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary:   #0a0f0a;
+            --bg-secondary: #0f1a0f;
+            --bg-card:      #142214;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted:   #71717a;
+            --accent:       #10b981;
+            --accent-light: #34d399;
+            --accent-glow:  rgba(16, 185, 129, 0.15);
+            --border:       #1f3d1f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        header {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+        .container-wide { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--accent), #22c55e);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        .header-nav { display: flex; align-items: center; gap: 0.25rem; }
+
+        .nav-link {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .nav-link:hover { color: var(--text-primary); background: var(--bg-card); }
+        .nav-link.active { color: var(--accent-light); }
+
+        .nav-link-cta {
+            background: var(--accent);
+            color: #fff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            margin-left: 0.25rem;
+        }
+        .nav-link-cta:hover { background: var(--accent-light); }
+
+        /* ── Blog Header ── */
+        .blog-hero {
+            padding: 3.5rem 0 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .blog-hero h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .blog-hero p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* ── Article Grid ── */
+        .blog-grid {
+            padding: 3rem 0 5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .article-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem 2rem;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .article-card:hover {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: #162816;
+        }
+
+        .article-card.coming-soon {
+            opacity: 0.6;
+            cursor: default;
+        }
+        .article-card.coming-soon:hover {
+            border-color: var(--border);
+            background: var(--bg-card);
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.9rem;
+        }
+
+        .tag {
+            background: var(--accent-glow);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--accent-light);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .article-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        .read-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .coming-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 100px;
+            background: rgba(113, 113, 122, 0.15);
+            border: 1px solid rgba(113, 113, 122, 0.3);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .article-card h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.6rem;
+            line-height: 1.35;
+        }
+
+        .article-card p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.65;
+            margin-bottom: 1rem;
+        }
+
+        .article-cta {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent-light);
+        }
+
+        /* ── Footer ── */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a { color: var(--accent-light); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header>
+        <div class="container-wide">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <div class="logo-icon">🪝</div>
+                    PingHook
+                </a>
+                <nav class="header-nav">
+                    <a href="/docs" class="nav-link">Docs</a>
+                    <a href="/blog" class="nav-link active">Blog</a>
+                    <a href="https://github.com/asafmd/PingHook" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://t.me/PingHookBot" class="nav-link-cta" target="_blank" rel="noopener">Open Bot →</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="blog-hero">
+            <div class="container">
+                <h1>Blog</h1>
+                <p>Integration guides, practical tips, and updates from PingHook.</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="blog-grid">
+
+                <!-- Article 1 — live -->
+                <a class="article-card" href="/blog/grafana-integration">
+                    <div class="article-meta">
+                        <span class="tag">Grafana</span>
+                        <span class="tag">Integration</span>
+                        <span class="read-time">4 min read</span>
+                        <span class="article-date">May 2025</span>
+                    </div>
+                    <h2>Route Grafana Alerts to Telegram — and stop alert fatigue</h2>
+                    <p>Get instant Telegram notifications when Grafana fires an alert, and filter out the noise with a single URL parameter. No bot setup, no token juggling — just paste a URL in Grafana's webhook contact point.</p>
+                    <div class="article-cta">Read article →</div>
+                </a>
+
+                <!-- Article 2 — coming soon -->
+                <div class="article-card coming-soon">
+                    <div class="article-meta">
+                        <span class="tag">GitHub Actions</span>
+                        <span class="tag">CI/CD</span>
+                        <span class="coming-badge">Coming soon</span>
+                    </div>
+                    <h2>Monitor GitHub Actions failures in Slack — one step, no third-party</h2>
+                    <p>A single workflow step sends CI failure notifications straight to Slack (or Telegram or Discord). No third-party integration apps, no webhook management, no extra spend.</p>
+                </div>
+
+                <!-- Article 3 — coming soon -->
+                <div class="article-card coming-soon">
+                    <div class="article-meta">
+                        <span class="tag">Linux</span>
+                        <span class="tag">Cron</span>
+                        <span class="coming-badge">Coming soon</span>
+                    </div>
+                    <h2>Dead-man's switch for cron jobs — get paged on failure with one curl line</h2>
+                    <p>One shell snippet turns any cron job into a monitored task. If it fails, you get a Telegram message. No server agent, no external service, no config — just curl and your webhook URL.</p>
+                </div>
+
+                <!-- Article 4 — coming soon -->
+                <div class="article-card coming-soon">
+                    <div class="article-meta">
+                        <span class="tag">Uptime Kuma</span>
+                        <span class="tag">Monitoring</span>
+                        <span class="coming-badge">Coming soon</span>
+                    </div>
+                    <h2>Uptime Kuma alerts to Telegram — only notify when a service goes down</h2>
+                    <p>Filter Uptime Kuma's webhook to only fire on "down" events, not on every recovery. One URL parameter, no config changes in Uptime Kuma itself.</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container-wide">
+            <p>
+                Built by a developer, for developers &mdash;
+                <a href="https://github.com/asafmd/PingHook" target="_blank" rel="noopener">Open source on GitHub</a>
+                &middot; <a href="/">pinghook.dev</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation — PingHook</title>
+    <meta name="description" content="Full API reference, bot commands, integration guides for Grafana, GitHub Actions, Uptime Kuma, n8n, Python, and cron jobs. PingHook delivers webhooks to Telegram, Slack, and Discord instantly.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary:   #0a0f0a;
+            --bg-secondary: #0f1a0f;
+            --bg-card:      #142214;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted:   #71717a;
+            --accent:       #10b981;
+            --accent-light: #34d399;
+            --accent-glow:  rgba(16, 185, 129, 0.15);
+            --border:       #1f3d1f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-primary);
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--accent), #22c55e);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        .header-nav { display: flex; align-items: center; gap: 0.25rem; }
+
+        .nav-link {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .nav-link:hover { color: var(--text-primary); background: var(--bg-card); }
+        .nav-link.active { color: var(--accent-light); }
+
+        .nav-link-cta {
+            background: var(--accent);
+            color: #fff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            margin-left: 0.25rem;
+        }
+        .nav-link-cta:hover { background: var(--accent-light); }
+
+        /* ── Docs Layout ── */
+        .docs-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 5rem;
+            display: grid;
+            grid-template-columns: 210px 1fr;
+            gap: 3.5rem;
+            align-items: start;
+        }
+
+        /* ── Sidebar ── */
+        .docs-sidebar {
+            position: sticky;
+            top: 80px;
+        }
+
+        .sidebar-nav { display: flex; flex-direction: column; gap: 1.5rem; }
+
+        .nav-group-title {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.13em;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-group a {
+            display: block;
+            font-size: 0.855rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.18rem 0;
+            transition: color 0.15s;
+            line-height: 1.6;
+        }
+        .nav-group a:hover { color: var(--accent-light); }
+
+        /* ── Docs Main ── */
+        .docs-main { min-width: 0; }
+
+        .docs-section {
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+        .docs-section:last-child { border-bottom: none; margin-bottom: 0; }
+
+        .docs-section h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .docs-section h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .docs-section h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        .docs-section p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            margin-bottom: 0.75rem;
+        }
+
+        .docs-section ul, .docs-section ol {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .docs-section li { margin-bottom: 0.3rem; }
+
+        .section-badge {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        /* ── Code blocks ── */
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+            white-space: pre-wrap;
+        }
+
+        .code-block .c { color: #4d7a6e; }
+        .code-block .k { color: #86efac; }
+        .code-block .v { color: #fde68a; }
+        .code-block .u { color: var(--accent-light); }
+        .code-block .f { color: #93c5fd; }
+        .code-block .m { color: #10b981; font-weight: 600; }
+
+        /* ── Tables ── */
+        .docs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            margin: 0.75rem 0;
+        }
+        .docs-table th {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 500;
+            border-bottom: 1px solid var(--border);
+        }
+        .docs-table td {
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid rgba(31,61,31,0.5);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+        .docs-table td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-light);
+            white-space: nowrap;
+        }
+        .docs-table tr:last-child td { border-bottom: none; }
+
+        /* ── Callouts ── */
+        .callout {
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            line-height: 1.65;
+            margin: 0.75rem 0;
+            color: var(--text-secondary);
+        }
+        .callout-info {
+            background: rgba(16, 185, 129, 0.07);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .callout-warn {
+            background: rgba(251, 191, 36, 0.07);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82em;
+            background: var(--accent-glow);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--accent-light);
+            padding: 0.1em 0.4em;
+            border-radius: 4px;
+        }
+
+        a { color: var(--accent-light); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* ── Step list ── */
+        .step-list { display: flex; flex-direction: column; gap: 0.85rem; margin: 1rem 0; }
+        .step-item { display: flex; gap: 1rem; align-items: flex-start; }
+        .step-num {
+            flex-shrink: 0;
+            width: 26px; height: 26px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--accent-light);
+        }
+        .step-item p { margin: 0; padding-top: 0.15rem; }
+
+        /* ── Command grid ── */
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+        }
+        .cmd-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+        .cmd-item code { display: block; margin-bottom: 0.3rem; font-size: 0.78rem; }
+        .cmd-item p { margin: 0; font-size: 0.82rem; color: var(--text-muted); }
+
+        /* ── Footer ── */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer a { color: var(--accent-light); }
+        footer a:hover { text-decoration: underline; }
+
+        /* ── Responsive ── */
+        @media (max-width: 800px) {
+            .docs-wrapper { grid-template-columns: 1fr; }
+            .docs-sidebar { display: none; }
+        }
+        @media (max-width: 580px) {
+            .cmd-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header>
+        <div class="container">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <div class="logo-icon">🪝</div>
+                    PingHook
+                </a>
+                <nav class="header-nav">
+                    <a href="/docs" class="nav-link active">Docs</a>
+                    <a href="/blog" class="nav-link">Blog</a>
+                    <a href="https://github.com/asafmd/PingHook" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://t.me/PingHookBot" class="nav-link-cta" target="_blank" rel="noopener">Open Bot →</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="docs-wrapper">
+
+        <!-- ── Sidebar ── -->
+        <aside class="docs-sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Start</div>
+                    <a href="#quickstart">Quick Start</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">API</div>
+                    <a href="#api-reference">Endpoint</a>
+                    <a href="#labels">Labels</a>
+                    <a href="#payload-formats">Payload Formats</a>
+                    <a href="#responses">Responses &amp; Errors</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Filtering</div>
+                    <a href="#layer1">Layer 1 — pinghook_rules</a>
+                    <a href="#layer2">Layer 2 — Query Params</a>
+                    <a href="#layer3">Layer 3 — Bot Rules</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Bot</div>
+                    <a href="#bot-commands">All Commands</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Integrations</div>
+                    <a href="#grafana">Grafana</a>
+                    <a href="#github-actions">GitHub Actions</a>
+                    <a href="#uptime-kuma">Uptime Kuma</a>
+                    <a href="#n8n">n8n</a>
+                    <a href="#python">Python</a>
+                    <a href="#cron">Cron Jobs</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Reference</div>
+                    <a href="#rate-limits">Rate Limits</a>
+                    <a href="#self-hosting">Self-Hosting</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- ── Main Content ── -->
+        <main class="docs-main">
+
+            <!-- QUICK START -->
+            <section class="docs-section" id="quickstart">
+                <h1>PingHook Documentation</h1>
+                <p>Webhooks to Telegram, Slack, and Discord — no account, no dashboard, just POST.</p>
+
+                <h2>Quick Start</h2>
+
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-num">1</div>
+                        <p>Open Telegram and message <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a>. Send <code>/start</code>. You receive a unique webhook URL — no email, no sign-up.</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">2</div>
+                        <p>Send a test ping from your terminal:</p>
+                    </div>
+                </div>
+
+                <div class="code-block">curl -X POST https://pinghook.dev/send/<span class="u">YOUR_KEY</span>/test \
+  -d "Hello from PingHook!"</div>
+
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-num">3</div>
+                        <p>The message arrives in Telegram within a second. That's it — paste the URL into Grafana, GitHub Actions, n8n, a cron job, or any HTTP client.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API REFERENCE -->
+            <section class="docs-section" id="api-reference">
+                <h2>API Endpoint</h2>
+                <p>One endpoint. No authentication headers — the API key is part of the URL path.</p>
+
+                <div class="code-block"><span class="m">POST</span> https://pinghook.dev/send/<span class="u">{api_key}</span>
+<span class="m">POST</span> https://pinghook.dev/send/<span class="u">{api_key}</span>/<span class="u">{label}</span></div>
+
+                <table class="docs-table">
+                    <thead><tr><th>Field</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>api_key</td><td>Your unique key — get it from <code>/start</code> in the bot</td></tr>
+                        <tr><td>label</td><td>Optional. Any URL path after your key — slashes become part of the label: <code>/send/KEY/github/ci/prod</code>. Shows in every notification.</td></tr>
+                        <tr><td>body</td><td>Any payload — JSON or plain text. Max 100 KB. <code>Content-Type</code> header is optional.</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- LABELS -->
+            <section class="docs-section" id="labels">
+                <h2>Labels</h2>
+                <p>The label is everything after your API key in the URL. It appears as the notification header and can target rules. Labels support slashes for hierarchy.</p>
+
+                <p>Simple label:</p>
+                <div class="code-block">https://pinghook.dev/send/YOUR_KEY/<span class="u">ci-failed</span></div>
+
+                <p>Hierarchical — slashes are part of the label:</p>
+                <div class="code-block">https://pinghook.dev/send/YOUR_KEY/<span class="u">github/myapp/prod</span></div>
+
+                <p>No label:</p>
+                <div class="code-block">https://pinghook.dev/send/YOUR_KEY</div>
+
+                <div class="callout callout-info">
+                    <strong>The label is the signal.</strong> When you own the code, fire the webhook only when the event is actually worth reading — and pick a label that says what happened. You usually don't need alerting rules at all.
+                </div>
+            </section>
+
+            <!-- PAYLOAD FORMATS -->
+            <section class="docs-section" id="payload-formats">
+                <h2>Payload Formats</h2>
+
+                <h3>JSON</h3>
+                <p>JSON is auto-detected and pretty-printed in a monospace code block. You don't need a <code>Content-Type</code> header — PingHook tries JSON parsing first on every request.</p>
+
+                <div class="code-block">curl -X POST https://pinghook.dev/send/<span class="u">YOUR_KEY</span>/ci-failed \
+  <span class="f">-H</span> <span class="v">"Content-Type: application/json"</span> \
+  <span class="f">-d</span> <span class="v">'{"event":"test_failed","repo":"myapp","run":142}'</span></div>
+
+                <h3>Plain Text &amp; Markdown</h3>
+                <p>Plain text is delivered as-is. Telegram renders a subset of Markdown natively.</p>
+
+                <table class="docs-table">
+                    <thead><tr><th>Syntax</th><th>Result</th></tr></thead>
+                    <tbody>
+                        <tr><td>**bold**</td><td>Bold text</td></tr>
+                        <tr><td>_italic_</td><td>Italic text</td></tr>
+                        <tr><td>~~strikethrough~~</td><td>Strikethrough</td></tr>
+                        <tr><td>`inline code`</td><td>Monospace inline</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block">curl -X POST https://pinghook.dev/send/<span class="u">YOUR_KEY</span>/deploy \
+  <span class="f">-d</span> <span class="v">"**Deploy succeeded** on main
+_By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
+
+                <div class="callout callout-info">
+                    Slack and Discord channels receive their own formatted versions — JSON is wrapped in a code fence, plain text is delivered as-is with their respective Markdown syntax.
+                </div>
+            </section>
+
+            <!-- RESPONSES -->
+            <section class="docs-section" id="responses">
+                <h2>Responses &amp; Errors</h2>
+
+                <table class="docs-table">
+                    <thead><tr><th>HTTP</th><th>status field</th><th>Meaning</th></tr></thead>
+                    <tbody>
+                        <tr><td>200</td><td>success</td><td>Delivered to one or more channels</td></tr>
+                        <tr><td>200</td><td>suppressed</td><td>Filtered by a rule or dedup — not an error</td></tr>
+                        <tr><td>200</td><td>failed</td><td>All channel deliveries failed (downstream issue)</td></tr>
+                        <tr><td>401</td><td>—</td><td>Unknown API key</td></tr>
+                        <tr><td>413</td><td>—</td><td>Payload exceeds 100 KB</td></tr>
+                        <tr><td>429</td><td>—</td><td>Rate limit exceeded — response includes <code>resets_in</code> (seconds)</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-info">
+                    Suppressed pings always return HTTP 200 with <code>"status":"suppressed"</code>. Check the body if your script needs to distinguish deliveries from filtered events.
+                </div>
+            </section>
+
+            <!-- LAYER 1 -->
+            <section class="docs-section" id="layer1">
+                <h2>Layer 1 — <code>pinghook_rules</code> <span class="section-badge">Highest Priority</span></h2>
+                <p>For sources you own. Add a <code>pinghook_rules</code> key to your JSON body — PingHook evaluates it, strips it, and delivers the rest. Recipients never see it.</p>
+
+                <div class="code-block">{
+  <span class="v">"event"</span>: <span class="v">"ci-run"</span>,
+  <span class="v">"branch"</span>: <span class="v">"main"</span>,
+  <span class="v">"errors"</span>: 14,
+  <span class="k">"pinghook_rules"</span>: {
+    <span class="k">"conditions"</span>: [
+      { <span class="v">"field"</span>: <span class="v">"errors"</span>, <span class="v">"operator"</span>: <span class="v">"gt"</span>, <span class="v">"value"</span>: 10 },
+      { <span class="v">"field"</span>: <span class="v">"branch"</span>, <span class="v">"operator"</span>: <span class="v">"eq"</span>, <span class="v">"value"</span>: <span class="v">"main"</span> }
+    ],
+    <span class="k">"logic"</span>: <span class="v">"AND"</span>,
+    <span class="k">"dedup"</span>: 30,
+    <span class="k">"channel"</span>: <span class="v">"slack"</span>
+  }
+}</div>
+
+                <p>This delivers only when <code>errors &gt; 10</code> AND <code>branch == "main"</code>, suppresses repeats for 30 minutes, and routes to Slack only. The delivered payload is everything minus <code>pinghook_rules</code>.</p>
+
+                <p>Use dot notation for nested fields: <code>"field": "labels.env"</code> or <code>"field": "alerts.0.status"</code>.</p>
+
+                <table class="docs-table">
+                    <thead><tr><th>Operator</th><th>Description</th><th>Type</th></tr></thead>
+                    <tbody>
+                        <tr><td>eq / neq</td><td>Equals / not equals</td><td>any</td></tr>
+                        <tr><td>gt / lt</td><td>Greater than / less than</td><td>numeric</td></tr>
+                        <tr><td>gte / lte</td><td>Greater or equal / less or equal</td><td>numeric</td></tr>
+                        <tr><td>contains</td><td>String contains (case-insensitive)</td><td>string</td></tr>
+                        <tr><td>exists</td><td>Field is present (any value)</td><td>any</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Shorthand keys inside pinghook_rules</h3>
+                <table class="docs-table">
+                    <thead><tr><th>Key</th><th>Value</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>logic</td><td>AND | OR</td><td>Condition logic (default: AND)</td></tr>
+                        <tr><td>dedup</td><td>integer (minutes)</td><td>Suppress same label within N minutes</td></tr>
+                        <tr><td>channel</td><td>telegram | slack | discord</td><td>Route to one platform only</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- LAYER 2 -->
+            <section class="docs-section" id="layer2">
+                <h2>Layer 2 — Query Params <span class="section-badge">Per-Request</span></h2>
+                <p>No body changes needed. Append params to the webhook URL. Works for any source where you can customise the URL — Grafana, Uptime Kuma, most SaaS tools.</p>
+
+                <table class="docs-table">
+                    <thead><tr><th>Param</th><th>Value</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>?channel=</td><td>telegram | slack | discord</td><td>Route to one platform, ignore others</td></tr>
+                        <tr><td>?dedup=</td><td>N (integer, minutes)</td><td>Suppress same label within N minutes</td></tr>
+                        <tr><td>?silent=</td><td>1 / true / yes</td><td>Log but don't deliver — dry-run mode</td></tr>
+                        <tr><td>?if=</td><td>field:operator:value</td><td>JSON field condition. Repeatable → AND. Fails closed on non-JSON body.</td></tr>
+                        <tr><td>?textif=</td><td>word</td><td>Body contains word (case-insensitive). Repeatable → AND. Works on any body type.</td></tr>
+                    </tbody>
+                </table>
+
+                <p><strong>?if= format:</strong> <code>field.path:operator:value</code> — dots for nesting, colon as separator.</p>
+
+                <p>Route to a specific platform only:</p>
+                <div class="code-block">curl "pinghook.dev/send/<span class="u">KEY</span>/deploy<span class="k">?channel=slack</span>" -d "done"</div>
+
+                <p>Suppress same-label repeats for 30 minutes:</p>
+                <div class="code-block">curl "pinghook.dev/send/<span class="u">KEY</span>/alert<span class="k">?dedup=30</span>" -d "server high cpu"</div>
+
+                <p>Log but don't deliver — dry-run:</p>
+                <div class="code-block">curl "pinghook.dev/send/<span class="u">KEY</span>/test<span class="k">?silent=1</span>" -d "test payload"</div>
+
+                <p>JSON field condition — only deliver when <code>status</code> equals <code>firing</code>:</p>
+                <div class="code-block">curl "pinghook.dev/send/<span class="u">KEY</span>/grafana<span class="k">?if=status:eq:firing</span>"</div>
+
+                <p>Multiple <code>?if=</code> params → AND logic:</p>
+                <div class="code-block">curl "pinghook.dev/send/<span class="u">KEY</span>/grafana<span class="k">?if=status:eq:firing&amp;if=labels.env:eq:prod</span>"</div>
+
+                <p>Text body contains (case-insensitive, repeatable → AND):</p>
+                <div class="code-block">curl "pinghook.dev/send/<span class="u">KEY</span>/logs<span class="k">?textif=error&amp;textif=critical</span>" -d "critical error in db"</div>
+
+                <p>Combine params — condition + platform routing + dedup:</p>
+                <div class="code-block">curl "pinghook.dev/send/<span class="u">KEY</span>/grafana<span class="k">?if=status:eq:firing&amp;channel=telegram&amp;dedup=5</span>"</div>
+
+                <div class="callout callout-warn">
+                    <strong>?if= fails closed:</strong> if the body isn't valid JSON, the ping is suppressed. For plain text or mixed sources, use <code>?textif=</code> instead.
+                </div>
+            </section>
+
+            <!-- LAYER 3 -->
+            <section class="docs-section" id="layer3">
+                <h2>Layer 3 — Global Bot Rules <span class="section-badge">Fallback</span></h2>
+                <p>Configured once in the Telegram bot via <code>/rules</code>. Applies to every ping on your key — use when you can't modify the body or the URL at all.</p>
+
+                <div class="cmd-grid">
+                    <div class="cmd-item">
+                        <code>/rules add keyword error</code>
+                        <p>Only deliver if payload contains "error" (case-insensitive)</p>
+                    </div>
+                    <div class="cmd-item">
+                        <code>/rules add dedup 30</code>
+                        <p>Suppress same label repeated within 30 minutes</p>
+                    </div>
+                    <div class="cmd-item">
+                        <code>/rules add labels ci deploy</code>
+                        <p>Only deliver pings whose label is "ci" or "deploy"</p>
+                    </div>
+                    <div class="cmd-item">
+                        <code>/rules remove 2</code>
+                        <p>Remove rule #2. <code>/rules clear confirm</code> removes all.</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-warn">
+                    Global rules apply to every ping on your key. If you have multiple sources with different filtering needs, use query params on each source URL instead. Multi-key support is planned.
+                </div>
+
+                <h3>Rule evaluation order</h3>
+                <p>Layer 1 (pinghook_rules in body) → Layer 2 (query params) → Layer 3 (bot rules). Higher layers take full priority. When Layer 1 is present, the <code>?if=</code> and <code>?textif=</code> conditions in Layer 2 are skipped — but <code>?channel=</code> and <code>?dedup=</code> still apply as defaults that Layer 1 can override.</p>
+            </section>
+
+            <!-- BOT COMMANDS -->
+            <section class="docs-section" id="bot-commands">
+                <h2>Bot Commands</h2>
+                <p>All commands are sent to <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a> in Telegram.</p>
+
+                <table class="docs-table">
+                    <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>/start</td><td>Create account and get your unique webhook URL</td></tr>
+                        <tr><td>/mykey</td><td>Show current webhook URL</td></tr>
+                        <tr><td>/regen confirm</td><td>Regenerate API key — old key is dead immediately</td></tr>
+                        <tr><td>/channels</td><td>List all active delivery channels</td></tr>
+                        <tr><td>/connect slack &lt;url&gt;</td><td>Add a Slack incoming webhook — validated with a test ping</td></tr>
+                        <tr><td>/connect discord &lt;url&gt;</td><td>Add a Discord webhook — validated with a test ping</td></tr>
+                        <tr><td>/disconnect &lt;n&gt;</td><td>Remove channel #n (from /channels list)</td></tr>
+                        <tr><td>/rules</td><td>List active global rules</td></tr>
+                        <tr><td>/rules add keyword &lt;word&gt;</td><td>Only deliver if payload contains this word</td></tr>
+                        <tr><td>/rules add dedup &lt;minutes&gt;</td><td>Suppress same-label repeats within N minutes</td></tr>
+                        <tr><td>/rules add labels &lt;l1&gt; &lt;l2&gt; …</td><td>Only deliver these labels (whitelist)</td></tr>
+                        <tr><td>/rules remove &lt;n&gt;</td><td>Remove rule #n</td></tr>
+                        <tr><td>/rules clear confirm</td><td>Remove all rules</td></tr>
+                        <tr><td>/usage</td><td>Ping stats — today, this week, all time, last ping</td></tr>
+                        <tr><td>/history</td><td>Last 10 successfully delivered pings with payload preview</td></tr>
+                        <tr><td>/replay &lt;n&gt;</td><td>Re-dispatch ping #n to all channels</td></tr>
+                        <tr><td>/help</td><td>List all commands</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- GRAFANA -->
+            <section class="docs-section" id="grafana">
+                <h2>Integration — Grafana</h2>
+                <p>Grafana sends a JSON payload when an alert fires or resolves. Add <code>?if=status:eq:firing</code> to only receive notifications when an alert fires — not when it resolves.</p>
+
+                <h3>Setup</h3>
+                <div class="step-list">
+                    <div class="step-item"><div class="step-num">1</div><p>In Grafana: <strong>Alerting → Contact points → New contact point</strong></p></div>
+                    <div class="step-item"><div class="step-num">2</div><p>Type: <strong>Webhook</strong></p></div>
+                    <div class="step-item"><div class="step-num">3</div><p>URL: <code>https://pinghook.dev/send/YOUR_KEY/grafana?if=status:eq:firing</code></p></div>
+                    <div class="step-item"><div class="step-num">4</div><p>Save and send a test notification to confirm it works</p></div>
+                </div>
+
+                <h3>Example Grafana payload</h3>
+                <div class="code-block">{
+  <span class="k">"status"</span>: <span class="v">"firing"</span>,
+  <span class="k">"receiver"</span>: <span class="v">"pinghook"</span>,
+  <span class="k">"commonLabels"</span>: { <span class="v">"alertname"</span>: <span class="v">"HighCPU"</span>, <span class="v">"env"</span>: <span class="v">"production"</span> },
+  <span class="k">"commonAnnotations"</span>: { <span class="v">"summary"</span>: <span class="v">"CPU &gt; 90% for 5 minutes"</span> },
+  <span class="k">"alerts"</span>: [{ <span class="v">"status"</span>: <span class="v">"firing"</span> }]
+}</div>
+
+                <h3>Useful filter combinations</h3>
+
+                <p>Only prod alerts, only when firing:</p>
+                <div class="code-block">?if=status:eq:firing&amp;if=commonLabels.env:eq:production</div>
+
+                <p>Suppress duplicate alerts for 10 minutes:</p>
+                <div class="code-block">?if=status:eq:firing&amp;dedup=10</div>
+
+                <p>Route critical alerts to Telegram only, everything else to Slack (set as two separate contact points in Grafana):</p>
+                <div class="code-block">?if=status:eq:firing&amp;if=commonLabels.severity:eq:critical&amp;channel=telegram</div>
+                <div class="code-block">?if=status:eq:firing&amp;channel=slack</div>
+            </section>
+
+            <!-- GITHUB ACTIONS -->
+            <section class="docs-section" id="github-actions">
+                <h2>Integration — GitHub Actions</h2>
+                <p>Add a step at the end of any workflow. Use <code>if: failure()</code> to notify only on failures, or different labels per outcome.</p>
+
+                <div class="code-block"><span class="c"># .github/workflows/ci.yml</span>
+<span class="k">- name:</span> <span class="v">Notify via PingHook</span>
+  <span class="k">if:</span> <span class="v">failure()</span>
+  <span class="k">run:</span> |
+    curl -s -X POST \
+      https://pinghook.dev/send/<span class="u">${{ secrets.PINGHOOK_KEY }}</span>/ci-failed \
+      -H <span class="v">"Content-Type: application/json"</span> \
+      -d '{
+        "repo": "${{ github.repository }}",
+        "branch": "${{ github.ref_name }}",
+        "run": ${{ github.run_number }},
+        "actor": "${{ github.actor }}"
+      }'</div>
+
+                <p>Store your key in GitHub: <strong>Settings → Secrets and variables → Actions → New repository secret → PINGHOOK_KEY</strong>.</p>
+
+                <h3>Different labels per outcome</h3>
+                <div class="code-block"><span class="k">- name:</span> <span class="v">PingHook on failure</span>
+  <span class="k">if:</span> <span class="v">failure()</span>
+  <span class="k">run:</span> <span class="v">curl -s -X POST https://pinghook.dev/send/${{ secrets.PINGHOOK_KEY }}/ci-failed -d "Run ${{ github.run_number }} failed"</span>
+
+<span class="k">- name:</span> <span class="v">PingHook on success</span>
+  <span class="k">if:</span> <span class="v">success()</span>
+  <span class="k">run:</span> <span class="v">curl -s -X POST https://pinghook.dev/send/${{ secrets.PINGHOOK_KEY }}/ci-passed -d "Run ${{ github.run_number }} passed"</span></div>
+            </section>
+
+            <!-- UPTIME KUMA -->
+            <section class="docs-section" id="uptime-kuma">
+                <h2>Integration — Uptime Kuma</h2>
+                <p>Add PingHook as a webhook notification. Use <code>?if=heartbeat.status:eq:0</code> to notify only when a monitor goes <strong>down</strong>, not on recovery.</p>
+
+                <h3>Setup</h3>
+                <div class="step-list">
+                    <div class="step-item"><div class="step-num">1</div><p>In Uptime Kuma: <strong>Settings → Notifications → Add Notification</strong></p></div>
+                    <div class="step-item"><div class="step-num">2</div><p>Type: <strong>Webhook</strong></p></div>
+                    <div class="step-item"><div class="step-num">3</div><p>URL: <code>https://pinghook.dev/send/YOUR_KEY/uptime-kuma?if=heartbeat.status:eq:0</code></p></div>
+                </div>
+
+                <h3>Uptime Kuma payload (example)</h3>
+                <div class="code-block">{
+  <span class="k">"heartbeat"</span>: { <span class="k">"status"</span>: <span class="v">0</span>, <span class="k">"msg"</span>: <span class="v">"Connection refused"</span> },
+  <span class="k">"monitor"</span>: { <span class="k">"name"</span>: <span class="v">"My Service"</span>, <span class="k">"url"</span>: <span class="v">"https://mysite.com"</span> }
+}</div>
+
+                <table class="docs-table">
+                    <thead><tr><th>heartbeat.status</th><th>Meaning</th></tr></thead>
+                    <tbody>
+                        <tr><td>0</td><td>Down</td></tr>
+                        <tr><td>1</td><td>Up / recovered</td></tr>
+                        <tr><td>2</td><td>Pending</td></tr>
+                        <tr><td>3</td><td>Maintenance</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- N8N -->
+            <section class="docs-section" id="n8n">
+                <h2>Integration — n8n</h2>
+                <p>Use PingHook as a notification step in any n8n workflow via the <strong>HTTP Request</strong> node.</p>
+
+                <table class="docs-table">
+                    <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+                    <tbody>
+                        <tr><td>Method</td><td>POST</td></tr>
+                        <tr><td>URL</td><td><code>https://pinghook.dev/send/YOUR_KEY/n8n-alert</code></td></tr>
+                        <tr><td>Body Content Type</td><td>JSON</td></tr>
+                        <tr><td>JSON Body</td><td>Any fields from your workflow data</td></tr>
+                    </tbody>
+                </table>
+
+                <p>You can use n8n expressions in the URL for dynamic labels: <code>https://pinghook.dev/send/KEY/{{ $json.eventType }}</code>.</p>
+
+                <div class="callout callout-info">
+                    Drop PingHook at the end of n8n error-handling branches for instant failure notifications without a separate monitoring service.
+                </div>
+            </section>
+
+            <!-- PYTHON -->
+            <section class="docs-section" id="python">
+                <h2>Integration — Python</h2>
+
+                <div class="code-block"><span class="c"># pip install requests</span>
+<span class="k">import</span> requests
+
+PINGHOOK_URL = <span class="v">"https://pinghook.dev/send/YOUR_KEY"</span></div>
+
+                <p>JSON payload:</p>
+                <div class="code-block">requests.post(
+    f<span class="v">"{PINGHOOK_URL}/payment-received"</span>,
+    json={<span class="v">"amount"</span>: 49.00, <span class="v">"customer"</span>: <span class="v">"jane@acme.com"</span>}
+)</div>
+
+                <p>Plain text:</p>
+                <div class="code-block">requests.post(f<span class="v">"{PINGHOOK_URL}/cron-done"</span>, data=<span class="v">"ETL pipeline finished in 3.2s"</span>)</div>
+
+                <p>With dedup — suppress the same label for 30 minutes:</p>
+                <div class="code-block">requests.post(
+    f<span class="v">"{PINGHOOK_URL}/high-cpu"</span>,
+    data=<span class="v">"CPU spike detected"</span>,
+    params={<span class="v">"dedup"</span>: 30}
+)</div>
+
+                <h3>Minimal wrapper function</h3>
+                <div class="code-block"><span class="k">def</span> ping(label: str, payload=None, **params):
+    url = f<span class="v">"https://pinghook.dev/send/YOUR_KEY/{label}"</span>
+    kw = {<span class="v">"params"</span>: params}
+    <span class="k">if isinstance</span>(payload, dict):
+        requests.post(url, json=payload, **kw)
+    <span class="k">else</span>:
+        requests.post(url, data=payload <span class="k">or</span> <span class="v">""</span>, **kw)
+
+<span class="c"># Usage</span>
+ping(<span class="v">"payment-received"</span>, {<span class="v">"amount"</span>: 99})
+ping(<span class="v">"job-done"</span>, <span class="v">"Backup complete"</span>, dedup=60)</div>
+            </section>
+
+            <!-- CRON JOBS -->
+            <section class="docs-section" id="cron">
+                <h2>Integration — Cron Jobs</h2>
+                <p>Add one line to any shell script or crontab to get notified on failure — or on completion.</p>
+
+                <p>Ping on completion (append to any script):</p>
+                <div class="code-block">curl -s -X POST https://pinghook.dev/send/<span class="u">YOUR_KEY</span>/backup-done \
+  -d <span class="v">"Backup finished at $(date) — $(du -sh /backup | cut -f1)"</span></div>
+
+                <p>Ping only on failure — dead-man's switch:</p>
+                <div class="code-block">/opt/myjob.sh || curl -s -X POST https://pinghook.dev/send/<span class="u">YOUR_KEY</span>/job-failed \
+  -d <span class="v">"myjob.sh failed at $(date)"</span></div>
+
+                <p>In crontab with dedup — suppress repeated hourly alerts so only the first failure comes through:</p>
+                <div class="code-block">0 * * * * /opt/health_check.sh || \
+  curl -s -X POST "https://pinghook.dev/send/<span class="u">YOUR_KEY</span>/cron-failed?dedup=55" \
+  -d "health_check.sh failed at $(date)"</div>
+
+                <div class="callout callout-info">
+                    <strong>Tip:</strong> <code>?dedup=55</code> on an hourly cron means the first failure pings you, but subsequent failures are silent until the job recovers — no alert storm.
+                </div>
+            </section>
+
+            <!-- RATE LIMITS -->
+            <section class="docs-section" id="rate-limits">
+                <h2>Rate Limits</h2>
+
+                <table class="docs-table">
+                    <thead><tr><th>Limit</th><th>Free tier</th></tr></thead>
+                    <tbody>
+                        <tr><td>Per hour</td><td>100 requests</td></tr>
+                        <tr><td>Per day</td><td>1,000 requests</td></tr>
+                        <tr><td>Max payload size</td><td>100 KB per request</td></tr>
+                    </tbody>
+                </table>
+
+                <p>When exceeded, you get HTTP 429 with <code>resets_in</code> in the response body (seconds until the window resets). Rate-limited requests are still logged — check <code>/usage</code> in the bot for your counts.</p>
+                <p>Suppressed pings (filtered by rules) do <strong>not</strong> count against the rate limit.</p>
+            </section>
+
+            <!-- SELF-HOSTING -->
+            <section class="docs-section" id="self-hosting">
+                <h2>Self-Hosting</h2>
+                <p>PingHook is fully open source. Run your own instance with your own bot and database.</p>
+
+                <h3>Requirements</h3>
+                <ul>
+                    <li>Python 3.11+</li>
+                    <li>A Telegram bot token (from <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a>)</li>
+                    <li>PostgreSQL database (Supabase free tier works)</li>
+                    <li>Public HTTPS URL (Render, Railway, Fly.io free tiers all work)</li>
+                </ul>
+
+                <h3>Setup</h3>
+                <p>Clone and install:</p>
+                <div class="code-block">git clone https://github.com/asafmd/PingHook &amp;&amp; cd PingHook
+pip install -r requirements.txt</div>
+
+                <p>Create <code>.env</code>:</p>
+                <div class="code-block">TELEGRAM_BOT_TOKEN=your_bot_token
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_KEY=your_service_role_key
+BASE_URL=https://your-domain.com
+ADMIN_SECRET=optional_admin_token</div>
+
+                <p>Apply the schema — paste <code>schema.sql</code> into the Supabase SQL editor and run it.</p>
+
+                <p>Start the server:</p>
+                <div class="code-block">uvicorn app.main:app --host 0.0.0.0 --port 8000</div>
+
+                <p>Register the Telegram webhook (run once after every deploy):</p>
+                <div class="code-block">python webhook.py</div>
+
+                <div class="callout callout-info">
+                    Local development needs a public tunnel. Run <code>ngrok http 8000</code>, set <code>BASE_URL</code> to the ngrok HTTPS URL, then run <code>python webhook.py</code> to register it with Telegram.
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer>
+        <div class="container">
+            <p>
+                Built by a developer, for developers &mdash;
+                <a href="https://github.com/asafmd/PingHook" target="_blank" rel="noopener">Open source on GitHub</a>
+                &middot; <a href="/">pinghook.dev</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>

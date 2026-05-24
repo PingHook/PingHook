@@ -241,6 +241,26 @@ async def send_labeled(request: Request, api_key: str, label: str):
     return await _handle_send(request, api_key, label.strip("/"))
 
 
+# ── Static pages ─────────────────────────────────────────────────────────────
+
+@app.get("/docs", response_class=HTMLResponse)
+async def docs_page(request: Request):
+    return templates.TemplateResponse("docs.html", {"request": request})
+
+
+@app.get("/blog", response_class=HTMLResponse)
+async def blog_page(request: Request):
+    return templates.TemplateResponse("blog.html", {"request": request})
+
+
+@app.get("/blog/{slug}", response_class=HTMLResponse)
+async def blog_post(request: Request, slug: str):
+    try:
+        return templates.TemplateResponse(f"blog/{slug}.html", {"request": request})
+    except Exception:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+
 # ── Public stats ──────────────────────────────────────────────────────────────
 
 @app.get("/api/stats/public")

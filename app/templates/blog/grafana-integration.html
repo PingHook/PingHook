@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Grafana Alerts to Telegram — PingHook</title>
+    <meta name="description" content="Get instant Telegram notifications from Grafana alerts with zero setup. Paste one URL into Grafana's webhook contact point — no bot token, no chat ID, no config.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary:   #0a0f0a;
+            --bg-secondary: #0f1a0f;
+            --bg-card:      #142214;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted:   #71717a;
+            --accent:       #10b981;
+            --accent-light: #34d399;
+            --accent-glow:  rgba(16, 185, 129, 0.15);
+            --border:       #1f3d1f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container-wide { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--accent), #22c55e);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        .header-nav { display: flex; align-items: center; gap: 0.25rem; }
+
+        .nav-link {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .nav-link:hover { color: var(--text-primary); background: var(--bg-card); }
+
+        .nav-link-cta {
+            background: var(--accent);
+            color: #fff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+            margin-left: 0.25rem;
+        }
+        .nav-link-cta:hover { background: var(--accent-light); }
+
+        /* ── Article layout ── */
+        .article-wrapper {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3.5rem 1.5rem 5rem;
+        }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--accent-light); }
+
+        /* ── Article header ── */
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .tag {
+            background: var(--accent-glow);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--accent-light);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .meta-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .article-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .article-lead {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ── Article body ── */
+        .article-body h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 2.5rem 0 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .article-body h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 1.75rem 0 0.5rem;
+        }
+
+        .article-body p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.75;
+            margin-bottom: 1rem;
+        }
+
+        .article-body ul, .article-body ol {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.75;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .article-body li { margin-bottom: 0.35rem; }
+        .article-body strong { color: var(--text-primary); font-weight: 600; }
+
+        .article-body a { color: var(--accent-light); text-decoration: none; }
+        .article-body a:hover { text-decoration: underline; }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82em;
+            background: var(--accent-glow);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--accent-light);
+            padding: 0.1em 0.4em;
+            border-radius: 4px;
+        }
+
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin: 0.75rem 0 1.25rem;
+            white-space: pre-wrap;
+        }
+
+        .code-block .c { color: #4d7a6e; }
+        .code-block .k { color: #86efac; }
+        .code-block .v { color: #fde68a; }
+        .code-block .u { color: var(--accent-light); }
+
+        .callout {
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            line-height: 1.65;
+            margin: 0.75rem 0 1.25rem;
+            color: var(--text-secondary);
+        }
+        .callout-info {
+            background: rgba(16, 185, 129, 0.07);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .callout-warn {
+            background: rgba(251, 191, 36, 0.07);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        /* ── CTA box ── */
+        .article-cta-box {
+            background: var(--bg-card);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 14px;
+            padding: 1.5rem 1.75rem;
+            margin: 3rem 0 0;
+            text-align: center;
+        }
+
+        .article-cta-box h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .article-cta-box p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .cta-btn:hover { background: var(--accent-light); }
+
+        /* ── Footer ── */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer a { color: var(--accent-light); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header>
+        <div class="container-wide">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <div class="logo-icon">🪝</div>
+                    PingHook
+                </a>
+                <nav class="header-nav">
+                    <a href="/docs" class="nav-link">Docs</a>
+                    <a href="/blog" class="nav-link">Blog</a>
+                    <a href="https://github.com/asafmd/PingHook" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://t.me/PingHookBot" class="nav-link-cta" target="_blank" rel="noopener">Open Bot →</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article class="article-wrapper">
+
+            <div class="breadcrumb">
+                <a href="/blog">Blog</a>
+                <span>›</span>
+                <span>Grafana Integration</span>
+            </div>
+
+            <div class="article-meta">
+                <span class="tag">Grafana</span>
+                <span class="tag">Integration</span>
+                <span class="meta-text">May 2025</span>
+                <span class="meta-text">·</span>
+                <span class="meta-text">4 min read</span>
+            </div>
+
+            <h1 class="article-title">Route Grafana Alerts to Telegram — and stop alert fatigue</h1>
+
+            <p class="article-lead">
+                Get instant Telegram notifications when Grafana fires an alert — and filter out the noise with one URL parameter. No bot setup, no token juggling — just paste a URL into Grafana's webhook contact point.
+            </p>
+
+            <div class="article-body">
+
+                <h2>The problem with Grafana's native Telegram integration</h2>
+
+                <p>Grafana has a built-in Telegram contact point. But to use it you need to:</p>
+                <ol>
+                    <li>Create a Telegram bot via <strong>@BotFather</strong> and generate a token</li>
+                    <li>Find your Telegram chat ID (send a message and hit the API to retrieve it)</li>
+                    <li>Paste both into Grafana</li>
+                    <li>Repeat for every team member who wants alerts</li>
+                </ol>
+
+                <p>It works, but it's four steps of friction before you see a single notification. And if you want to fan out to Slack or Discord as well, you're setting up separate integrations for each platform.</p>
+
+                <p><strong>PingHook reduces this to one step.</strong> You get a webhook URL from the bot. Paste it into Grafana. Done.</p>
+
+                <h2>Prerequisites</h2>
+                <ul>
+                    <li>Grafana with unified alerting (version 8.x or later)</li>
+                    <li>A Telegram account</li>
+                    <li>About 30 seconds</li>
+                </ul>
+
+                <h2>Step 1 — Get your PingHook URL</h2>
+
+                <p>Open Telegram and message <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a>. Send <code>/start</code>. The bot replies with your unique webhook URL instantly — no email, no password, no signup.</p>
+
+                <div class="code-block">https://pinghook.dev/send/<span class="u">YOUR_KEY</span></div>
+
+                <h2>Step 2 — Add a Webhook contact point in Grafana</h2>
+
+                <ol>
+                    <li>Go to <strong>Alerting → Contact points → New contact point</strong></li>
+                    <li>Set the type to <strong>Webhook</strong></li>
+                    <li>Paste your URL with a label and a filter:</li>
+                </ol>
+
+                <div class="code-block">https://pinghook.dev/send/<span class="u">YOUR_KEY</span>/grafana<span class="k">?if=status:eq:firing</span></div>
+
+                <p>The <code>?if=status:eq:firing</code> filter is the critical part. Grafana sends a webhook for <em>both</em> firing and resolved events — without this, you get notified every time an alert recovers too. The filter keeps only what's actionable.</p>
+
+                <ol start="4">
+                    <li>Click <strong>Test</strong> — Grafana sends a sample payload and you'll see a message in Telegram within seconds</li>
+                    <li>Save the contact point and assign it to a notification policy</li>
+                </ol>
+
+                <h2>What the notification looks like</h2>
+
+                <p>Grafana sends a structured JSON payload. PingHook auto-formats it as a readable code block in Telegram:</p>
+
+                <div class="code-block"><span class="c"># You receive this in Telegram:</span>
+🔔 [grafana]
+
+{
+  "status": "firing",
+  "receiver": "pinghook",
+  "commonLabels": {
+    "alertname": "HighCPU",
+    "env": "production"
+  },
+  "commonAnnotations": {
+    "summary": "CPU &gt; 90% for 5 minutes"
+  }
+}</div>
+
+                <div class="callout callout-info">
+                    You can slim down the payload in Grafana's contact point settings — include only the fields you care about to keep the notification short.
+                </div>
+
+                <h2>Advanced: filtering and routing</h2>
+
+                <h3>Only prod alerts</h3>
+                <p>Chain multiple <code>?if=</code> params — all must pass (AND logic):</p>
+
+                <div class="code-block">?if=status:eq:firing&amp;if=commonLabels.env:eq:production</div>
+
+                <h3>Suppress alert storms</h3>
+                <p>Add <code>?dedup=10</code> to suppress the same alert for 10 minutes — so a flapping service doesn't flood your chat:</p>
+
+                <div class="code-block">?if=status:eq:firing&amp;dedup=10</div>
+
+                <h3>Route critical alerts to Telegram, others to Slack</h3>
+                <p>Create two contact points in Grafana — each pointing to a different PingHook URL with a <code>?channel=</code> param:</p>
+
+                <div class="code-block"><span class="c"># Contact point 1 — critical → Telegram only</span>
+?if=status:eq:firing&amp;if=commonLabels.severity:eq:critical&amp;channel=telegram
+
+<span class="c"># Contact point 2 — everything else → Slack only</span>
+?if=status:eq:firing&amp;channel=slack</div>
+
+                <p>Both URLs share the same API key. The <code>?channel=</code> param handles the routing — your other channels stay connected and unaffected.</p>
+
+                <h3>Fan out to Slack and Discord at once</h3>
+                <p>Connect additional channels in the Telegram bot — then every Grafana alert lands everywhere simultaneously:</p>
+
+                <div class="code-block">/connect slack https://hooks.slack.com/services/...
+/connect discord https://discord.com/api/webhooks/...</div>
+
+                <h2>Troubleshooting</h2>
+
+                <p><strong>Test ping works, real alerts don't appear.</strong> Check your notification policy — the contact point needs to be in the routing tree. Run <code>/history</code> in the bot to see if pings are arriving but being suppressed.</p>
+
+                <p><strong>Still getting "resolved" notifications.</strong> Confirm <code>?if=status:eq:firing</code> is in the URL. Without it, PingHook delivers both firing and resolved events.</p>
+
+                <p><strong>Alert storm flooding your chat.</strong> Add <code>?dedup=N</code> (minutes). The first alert comes through; subsequent ones with the same label are suppressed until the window expires.</p>
+
+                <p><strong>Want to inspect what Grafana is actually sending.</strong> Use <code>?silent=1</code> temporarily — pings are logged but not delivered. Then check <code>/history</code> in the bot to see the raw payload.</p>
+
+                <h2>Summary</h2>
+
+                <p>Four steps from zero to notified:</p>
+                <ol>
+                    <li>Get your URL from <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a> via <code>/start</code></li>
+                    <li>Add a Webhook contact point in Grafana with <code>?if=status:eq:firing</code> appended</li>
+                    <li>Assign it to a notification policy</li>
+                    <li>Fire a test alert — message lands in Telegram within a second</li>
+                </ol>
+
+                <div class="article-cta-box">
+                    <h3>Try it in 30 seconds</h3>
+                    <p>Open the bot, send /start, get your URL. No account, no email, no config.</p>
+                    <a href="https://t.me/PingHookBot" class="cta-btn" target="_blank" rel="noopener">Open @PingHookBot in Telegram →</a>
+                </div>
+
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <div class="container-wide">
+            <p>
+                Built by a developer, for developers &mdash;
+                <a href="https://github.com/asafmd/PingHook" target="_blank" rel="noopener">Open source on GitHub</a>
+                &middot; <a href="/docs">Full docs</a>
+                &middot; <a href="/blog">Blog</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
