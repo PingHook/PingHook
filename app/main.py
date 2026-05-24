@@ -45,7 +45,14 @@ async def lifespan(app: FastAPI):
     await bot.session.close()
 
 
-app = FastAPI(title="PingHook", version="4.1.0", lifespan=lifespan)
+app = FastAPI(
+    title="PingHook",
+    version="4.1.0",
+    lifespan=lifespan,
+    docs_url=None,      # disable Swagger UI — we have our own /docs page
+    redoc_url=None,
+    openapi_url=None,
+)
 
 
 # ── Landing page ──────────────────────────────────────────────────────────────
