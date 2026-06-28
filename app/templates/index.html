@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PingHook — Webhooks to Telegram, Slack &amp; Discord</title>
+    <title>PingHook — Webhook Notifications for Slack &amp; Telegram</title>
     <meta name="description"
-        content="Turn any webhook into an instant notification. Deliver to Telegram, Slack, or Discord. No signup, no dashboard. Just POST to a URL.">
+        content="Turn any webhook into an instant Slack or Telegram notification. No signup, no dashboard. Just POST to a URL.">
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪝</text></svg>">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://pinghook.dev/">
-    <meta property="og:title" content="PingHook — Webhooks to Telegram, Slack &amp; Discord">
-    <meta property="og:description" content="Turn any webhook into an instant notification. Deliver to Telegram, Slack, or Discord. No signup, no dashboard. Just POST to a URL.">
+    <meta property="og:title" content="PingHook — Webhook Notifications for Slack &amp; Telegram">
+    <meta property="og:description" content="Turn any webhook into an instant Slack or Telegram notification. No signup, no dashboard. Just POST to a URL.">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="PingHook — Webhooks to Telegram, Slack &amp; Discord">
-    <meta name="twitter:description" content="Turn any webhook into an instant notification. Deliver to Telegram, Slack, or Discord. No signup, no dashboard. Just POST to a URL.">
+    <meta name="twitter:title" content="PingHook — Webhook Notifications for Slack &amp; Telegram">
+    <meta name="twitter:description" content="Turn any webhook into an instant Slack or Telegram notification. No signup, no dashboard. Just POST to a URL.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,9 +34,9 @@
             --bg-primary: #0a0f0a;
             --bg-secondary: #0f1a0f;
             --bg-card: #142214;
-            --bg-tg: #0e1621;
-            --bg-tg-bar: #17212b;
-            --bg-tg-bubble: #182533;
+            --bg-slack: #1a1d21;
+            --bg-slack-sidebar: #101214;
+            --bg-slack-msg: #222529;
             --text-primary: #ffffff;
             --text-secondary: #a1a1aa;
             --text-muted: #71717a;
@@ -256,87 +256,146 @@
             color: var(--text-muted);
         }
 
-        /* ── Telegram Mockup ── */
-        .telegram-mockup {
-            background: var(--bg-tg);
-            border-radius: 18px;
+        /* ── Slack Mockup ── */
+        .slack-mockup {
+            background: var(--bg-slack);
+            border-radius: 14px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
             font-size: 0.875rem;
+            display: flex;
         }
 
-        .tg-topbar {
-            background: var(--bg-tg-bar);
-            padding: 0.85rem 1rem;
+        .slack-sidebar {
+            background: var(--bg-slack-sidebar);
+            width: 170px;
+            flex-shrink: 0;
+            padding: 1rem 0;
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .slack-workspace {
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: #fff;
+            padding: 0 0.9rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 0.5rem;
+        }
+
+        .slack-channel {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            padding: 0.25rem 0.9rem;
+            cursor: default;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 0.35rem;
         }
 
-        .tg-avatar {
-            width: 38px;
-            height: 38px;
+        .slack-channel::before { content: "#"; opacity: 0.5; }
+        .slack-channel.active { background: rgba(16,185,129,0.12); color: #fff; border-radius: 0; }
+        .slack-channel.active::before { opacity: 1; color: var(--accent-light); }
+
+        .slack-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .slack-topbar {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .slack-topbar-hash { color: var(--text-muted); }
+
+        .slack-messages {
+            padding: 0.75rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .slack-msg {
+            display: flex;
+            gap: 0.65rem;
+            align-items: flex-start;
+        }
+
+        .slack-bot-avatar {
+            width: 34px;
+            height: 34px;
             background: linear-gradient(135deg, var(--accent), #22c55e);
-            border-radius: 50%;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 17px;
+            font-size: 16px;
             flex-shrink: 0;
         }
 
-        .tg-name {
-            font-weight: 600;
-            font-size: 0.9rem;
+        .slack-msg-body { flex: 1; min-width: 0; }
+
+        .slack-msg-header {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .slack-bot-name {
+            font-weight: 700;
+            font-size: 0.85rem;
             color: #fff;
         }
 
-        .tg-status {
-            font-size: 0.72rem;
-            color: var(--accent-light);
-        }
-
-        .tg-messages {
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.6rem;
-            min-height: 220px;
-        }
-
-        .tg-bubble {
-            background: var(--bg-tg-bubble);
-            border-radius: 12px 12px 12px 3px;
-            padding: 0.75rem 0.9rem;
-            max-width: 95%;
-            line-height: 1.55;
-            color: #e8e8e8;
-            font-size: 0.82rem;
-        }
-
-        .tg-bubble .label-tag {
-            color: var(--accent-light);
+        .slack-app-tag {
+            font-size: 0.62rem;
             font-weight: 600;
-            margin-bottom: 0.3rem;
-            font-size: 0.78rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #9ca3af;
+            padding: 0.05rem 0.3rem;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
-        .tg-bubble pre {
+        .slack-msg-time { font-size: 0.7rem; color: var(--text-muted); }
+
+        .slack-label-tag {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--accent-light);
+            margin-bottom: 0.2rem;
+        }
+
+        .slack-msg-text {
+            font-size: 0.8rem;
+            color: #d1d5db;
+            line-height: 1.55;
+        }
+
+        .slack-code {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
+            background: var(--bg-slack-msg);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 4px;
+            padding: 0.4rem 0.6rem;
+            margin-top: 0.3rem;
             color: #a8d8b0;
             white-space: pre;
             line-height: 1.6;
-            margin-top: 0.25rem;
-        }
-
-        .tg-time {
-            font-size: 0.68rem;
-            color: #4d7a9e;
-            text-align: right;
-            margin-top: 0.35rem;
         }
 
         /* ── Section scaffold ── */
@@ -769,25 +828,23 @@
                             Free &middot; Open Source &middot; No Signup
                         </div>
 
-                        <h1 class="hero-brand">Webhooks to<br>Telegram, Slack<br>&amp; Discord.</h1>
+                        <h1 class="hero-brand">Webhook alerts<br>straight into<br>Slack.</h1>
 
                         <p class="hero-tagline">
                             POST any payload to your unique URL.<br>
-                            It lands in your chat <strong>within seconds</strong>.<br>
+                            It lands in Slack <strong>within seconds</strong>.<br>
                             No account. No dashboard. No config.
                         </p>
 
                         <div class="platform-row">
-                            <span class="platform-badge">✈️ Telegram</span>
-                            <span class="platform-divider">+</span>
                             <span class="platform-badge">💬 Slack</span>
                             <span class="platform-divider">+</span>
-                            <span class="platform-badge">🎮 Discord</span>
+                            <span class="platform-badge">✈️ Telegram</span>
                         </div>
 
                         <div class="cta-group">
                             <a href="https://t.me/PingHookBot" class="cta-primary" target="_blank" rel="noopener">
-                                Open in Telegram &rarr;
+                                Try on Telegram &rarr;
                             </a>
                             <a href="https://github.com/PingHook/PingHook" class="cta-secondary" target="_blank" rel="noopener">
                                 View Source
@@ -797,33 +854,51 @@
                     </div>
 
                     <div class="hero-right">
-                        <div class="telegram-mockup">
-                            <div class="tg-topbar">
-                                <div class="tg-avatar">🪝</div>
-                                <div>
-                                    <div class="tg-name">PingHookBot</div>
-                                    <div class="tg-status">bot</div>
-                                </div>
+                        <div class="slack-mockup">
+                            <div class="slack-sidebar">
+                                <div class="slack-workspace">My Team</div>
+                                <div class="slack-channel"># general</div>
+                                <div class="slack-channel active">alerts</div>
+                                <div class="slack-channel"># deployments</div>
+                                <div class="slack-channel"># payments</div>
                             </div>
-                            <div class="tg-messages">
-                                <div class="tg-bubble">
-                                    <div class="label-tag">🔔 [ci-failed]</div>
-<pre>{
+                            <div class="slack-main">
+                                <div class="slack-topbar">
+                                    <span class="slack-topbar-hash">#</span> alerts
+                                </div>
+                                <div class="slack-messages">
+                                    <div class="slack-msg">
+                                        <div class="slack-bot-avatar">🪝</div>
+                                        <div class="slack-msg-body">
+                                            <div class="slack-msg-header">
+                                                <span class="slack-bot-name">PingHook</span>
+                                                <span class="slack-app-tag">App</span>
+                                                <span class="slack-msg-time">2:32 PM</span>
+                                            </div>
+                                            <div class="slack-label-tag">🔔 [ci-failed]</div>
+                                            <div class="slack-code">{
   "repo": "myapp",
   "branch": "main",
   "status": "failed",
   "run": 142
-}</pre>
-                                    <div class="tg-time">14:32</div>
-                                </div>
-                                <div class="tg-bubble">
-                                    <div class="label-tag">🔔 [payment-received]</div>
-<pre>{
+}</div>
+                                        </div>
+                                    </div>
+                                    <div class="slack-msg">
+                                        <div class="slack-bot-avatar">🪝</div>
+                                        <div class="slack-msg-body">
+                                            <div class="slack-msg-header">
+                                                <span class="slack-bot-name">PingHook</span>
+                                                <span class="slack-app-tag">App</span>
+                                                <span class="slack-msg-time">2:35 PM</span>
+                                            </div>
+                                            <div class="slack-label-tag">🔔 [payment-received]</div>
+                                            <div class="slack-code">{
   "amount": 49.00,
-  "currency": "USD",
   "customer": "jane@acme.com"
-}</pre>
-                                    <div class="tg-time">14:35</div>
+}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -851,6 +926,7 @@
                     <span class="integration-pill">Prometheus AlertManager</span>
                     <span class="integration-pill">Any HTTP client</span>
                 </div>
+                <p style="text-align:center;margin-top:1rem;font-size:0.8rem;color:var(--text-muted);">Delivers to <strong style="color:var(--text-secondary)">💬 Slack</strong> &nbsp;·&nbsp; <strong style="color:var(--text-secondary)">✈️ Telegram</strong></p>
             </div>
         </div>
 
@@ -865,7 +941,7 @@
                     <div class="step">
                         <div class="step-number">1</div>
                         <h3>Start the bot</h3>
-                        <p>In Slack type <code>/pinghook</code> in any channel, or message <code>@PingHookBot</code> on Telegram. You get a unique webhook URL immediately.</p>
+                        <p>In Slack type <code>/pinghook</code> in any channel. Or message <code>@PingHookBot</code> on Telegram. You get a unique webhook URL — no email, no sign-up.</p>
                     </div>
                     <div class="step">
                         <div class="step-number">2</div>
@@ -875,7 +951,7 @@
                     <div class="step">
                         <div class="step-number">3</div>
                         <h3>Get notified instantly</h3>
-                        <p>Every POST becomes a message in your chat. Optionally connect additional channels via <code>/pinghook connect slack</code> and fan out to all three at once.</p>
+                        <p>Every POST becomes a Slack message instantly. Optionally connect Telegram too via <code>/pinghook connect</code> and fan out to both at once.</p>
                     </div>
                 </div>
             </div>
@@ -892,7 +968,7 @@
                     <div class="feature-card">
                         <div class="feature-icon">📡</div>
                         <h3>Multi-Channel Delivery</h3>
-                        <p>Fan out to Telegram, Slack, and Discord simultaneously. Connect Slack with <code>/pinghook connect slack &lt;url&gt;</code> — PingHook validates and sends a test ping before saving.</p>
+                        <p>Fan out to Slack and Telegram simultaneously. Add an incoming webhook with <code>/pinghook connect slack &lt;url&gt;</code> — PingHook validates with a test ping before saving.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🏷️</div>
@@ -938,8 +1014,8 @@
                         <div class="spec-label">Max payload size</div>
                     </div>
                     <div class="spec-card">
-                        <div class="spec-value">3 platforms</div>
-                        <div class="spec-label">Delivery targets</div>
+                        <div class="spec-value">2 platforms</div>
+                        <div class="spec-label">Slack &amp; Telegram</div>
                     </div>
                     <div class="spec-card">
                         <div class="spec-value">&lt;1s</div>
@@ -1044,8 +1120,8 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
 
                 <div class="faq-list">
                     <div class="faq-item">
-                        <h3>How do I add Slack or Discord?</h3>
-                        <p>Send <code>/pinghook connect slack https://hooks.slack.com/...</code> or <code>/pinghook connect discord https://discord.com/api/webhooks/...</code> to the bot (Slack or Telegram). PingHook validates the URL with a test ping before saving. Once connected, all future webhooks fan out to every channel at once.</p>
+                        <h3>How do I add a Slack channel?</h3>
+                        <p>Send <code>/pinghook connect slack https://hooks.slack.com/...</code> to the bot. PingHook validates the URL with a test ping before saving. Once connected, webhooks fan out to every connected channel at once.</p>
                     </div>
                     <div class="faq-item">
                         <h3>What's the rate limit?</h3>

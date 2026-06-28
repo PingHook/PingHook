@@ -28,8 +28,7 @@ HELP_TEXT = (
     "/pinghook mykey — show current URL\n"
     "/pinghook regen — regenerate API key\n"
     "/pinghook channels — list delivery channels\n"
-    "/pinghook connect slack &lt;url&gt; — add Slack incoming webhook\n"
-    "/pinghook connect discord &lt;url&gt; — add Discord\n"
+    "/pinghook connect slack &lt;url&gt; — add a Slack incoming webhook\n"
     "/pinghook disconnect &lt;n&gt; — remove a channel\n"
     "/pinghook rules — manage alerting rules\n"
     "/pinghook usage — view ping stats\n"
@@ -55,13 +54,6 @@ def _connect_instructions(channel_type: str) -> str:
             "2. Create app → Enable Incoming Webhooks\n"
             "3. Add to workspace → Copy webhook URL\n"
             "4. Send: /pinghook connect slack https://hooks.slack.com/..."
-        )
-    elif channel_type == "discord":
-        return (
-            "To get your Discord webhook URL:\n"
-            "1. Open channel settings → Integrations → Webhooks\n"
-            "2. Create webhook → Copy URL\n"
-            "3. Send: /pinghook connect discord https://discord.com/api/webhooks/..."
         )
     return ""
 
@@ -109,9 +101,8 @@ async def handle_message(
             f"<b>Quick test:</b>\n"
             f"<code>curl -X POST {url}/test -d \"Hello!\"</code>\n\n"
             f"──────────────────\n"
-            f"<b>Fan out to Slack or Discord:</b>\n"
-            f"/pinghook connect slack &lt;webhook-url&gt;\n"
-            f"/pinghook connect discord &lt;webhook-url&gt;\n\n"
+            f"<b>Fan out to Slack:</b>\n"
+            f"/pinghook connect slack &lt;webhook-url&gt;\n\n"
             f"<b>History &amp; replay:</b>\n"
             f"/pinghook history · /pinghook replay 1\n\n"
             f"<b>Advanced:</b> /pinghook rules — filter noise from sources you don't control\n"
@@ -160,8 +151,8 @@ async def handle_message(
             await send_reply("Usage: /connect slack &lt;url&gt; or /connect discord &lt;url&gt;")
             return
         channel_type = args[0].lower()
-        if channel_type not in ("slack", "discord"):
-            await send_reply("Usage: /connect slack &lt;url&gt; or /connect discord &lt;url&gt;")
+        if channel_type not in ("slack",):
+            await send_reply("Usage: /pinghook connect slack &lt;url&gt;")
             return
         if len(args) < 2:
             await send_reply(_connect_instructions(channel_type))
@@ -189,7 +180,7 @@ async def handle_message(
         if len(channels) == 1:
             await send_reply(
                 "⚠️ This is your only channel. Removing it means you won't receive any pings.\n\n"
-                "Connect another channel first with /connect slack or /connect discord."
+                "Connect another channel first with /pinghook connect slack."
             )
             return
         await deactivate_channel(channel["id"])

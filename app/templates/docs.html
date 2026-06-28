@@ -353,7 +353,7 @@
                     <a href="/docs" class="nav-link active">Docs</a>
                     <a href="/blog" class="nav-link">Blog</a>
                     <a href="https://github.com/PingHook/PingHook" class="nav-link" target="_blank" rel="noopener">GitHub</a>
-                    <a href="https://t.me/PingHookBot" class="nav-link-cta" target="_blank" rel="noopener">Open Bot →</a>
+                    <a href="#slack-setup" class="nav-link-cta">Install on Slack →</a>
                 </nav>
             </div>
         </div>
@@ -384,6 +384,10 @@
                 <div class="nav-group">
                     <div class="nav-group-title">Bot</div>
                     <a href="#bot-commands">All Commands</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Setup</div>
+                    <a href="#slack-setup">Slack Bot Setup</a>
                 </div>
                 <div class="nav-group">
                     <div class="nav-group-title">Integrations</div>
@@ -500,7 +504,7 @@
 _By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
 
                 <div class="callout callout-info">
-                    Slack and Discord channels receive their own formatted versions — JSON is wrapped in a code fence, plain text is delivered as-is with their respective Markdown syntax.
+                    Slack receives its own formatted version — JSON is wrapped in a code fence, plain text is delivered as-is with Slack mrkdwn syntax.
                 </div>
             </section>
 
@@ -566,7 +570,7 @@ _By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
                     <tbody>
                         <tr><td>logic</td><td>AND | OR</td><td>Condition logic (default: AND)</td></tr>
                         <tr><td>dedup</td><td>integer (minutes)</td><td>Suppress same label within N minutes</td></tr>
-                        <tr><td>channel</td><td>telegram | slack | discord</td><td>Route to one platform only</td></tr>
+                        <tr><td>channel</td><td>slack | telegram</td><td>Route to one platform only</td></tr>
                     </tbody>
                 </table>
             </section>
@@ -579,7 +583,7 @@ _By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
                 <table class="docs-table">
                     <thead><tr><th>Param</th><th>Value</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td>?channel=</td><td>telegram | slack | discord</td><td>Route to one platform, ignore others</td></tr>
+                        <tr><td>?channel=</td><td>slack | telegram</td><td>Route to one platform, ignore others</td></tr>
                         <tr><td>?dedup=</td><td>N (integer, minutes)</td><td>Suppress same label within N minutes</td></tr>
                         <tr><td>?silent=</td><td>1 / true / yes</td><td>Log but don't deliver — dry-run mode</td></tr>
                         <tr><td>?if=</td><td>field:operator:value</td><td>JSON field condition. Repeatable → AND. Fails closed on non-JSON body.</td></tr>
@@ -661,7 +665,6 @@ _By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
                         <tr><td>/pinghook regen confirm</td><td>Regenerate API key — old key is dead immediately</td></tr>
                         <tr><td>/pinghook channels</td><td>List all active delivery channels</td></tr>
                         <tr><td>/pinghook connect slack &lt;url&gt;</td><td>Add a Slack incoming webhook — validated with a test ping</td></tr>
-                        <tr><td>/pinghook connect discord &lt;url&gt;</td><td>Add a Discord webhook — validated with a test ping</td></tr>
                         <tr><td>/pinghook disconnect &lt;n&gt;</td><td>Remove channel #n (from /pinghook channels list)</td></tr>
                         <tr><td>/pinghook rules</td><td>List active global rules</td></tr>
                         <tr><td>/pinghook rules add keyword &lt;word&gt;</td><td>Only deliver if payload contains this word</td></tr>
@@ -675,6 +678,54 @@ _By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
                         <tr><td>/pinghook help</td><td>List all commands</td></tr>
                     </tbody>
                 </table>
+            </section>
+
+            <!-- SLACK SETUP -->
+            <section class="docs-section" id="slack-setup">
+                <h2>Slack Bot Setup</h2>
+                <p>Install the PingHook bot into your Slack workspace to use <code>/pinghook</code> slash commands and receive webhook notifications directly in Slack channels.</p>
+
+                <h3>Step 1 — Create a Slack App</h3>
+                <div class="step-list">
+                    <div class="step-item"><div class="step-num">1</div><p>Go to <a href="https://api.slack.com/apps" target="_blank" rel="noopener">api.slack.com/apps</a> → <strong>Create New App → From scratch</strong>. Name it <strong>PingHook</strong> and select your workspace.</p></div>
+                </div>
+
+                <h3>Step 2 — Add bot permissions</h3>
+                <div class="step-list">
+                    <div class="step-item"><div class="step-num">1</div><p>In the sidebar go to <strong>OAuth &amp; Permissions → Bot Token Scopes</strong>.</p></div>
+                    <div class="step-item"><div class="step-num">2</div><p>Add these two scopes: <code>commands</code> and <code>chat:write</code>. Nothing else needed.</p></div>
+                </div>
+
+                <h3>Step 3 — Register the slash command</h3>
+                <div class="step-list">
+                    <div class="step-item"><div class="step-num">1</div><p>In the sidebar go to <strong>Slash Commands → Create New Command</strong>.</p></div>
+                    <div class="step-item"><div class="step-num">2</div><p>Fill in the fields:</p></div>
+                </div>
+
+                <table class="docs-table">
+                    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+                    <tbody>
+                        <tr><td>Command</td><td>/pinghook</td></tr>
+                        <tr><td>Request URL</td><td>https://pinghook.dev/slack/events</td></tr>
+                        <tr><td>Short description</td><td>Webhook notifications via PingHook</td></tr>
+                        <tr><td>Usage hint</td><td>start | mykey | rules | history | help</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Step 4 — Install and get your tokens</h3>
+                <div class="step-list">
+                    <div class="step-item"><div class="step-num">1</div><p>Go to <strong>Install App → Install to Workspace</strong>. Authorize it.</p></div>
+                    <div class="step-item"><div class="step-num">2</div><p>Copy the <strong>Bot User OAuth Token</strong> (starts with <code>xoxb-</code>) → this is your <code>SLACK_BOT_TOKEN</code>.</p></div>
+                    <div class="step-item"><div class="step-num">3</div><p>Go to <strong>Basic Information → Signing Secret</strong> → this is your <code>SLACK_SIGNING_SECRET</code>.</p></div>
+                    <div class="step-item"><div class="step-num">4</div><p>Add both to your <code>.env</code> and redeploy.</p></div>
+                </div>
+
+                <h3>Step 5 — Test it</h3>
+                <p>In any Slack channel type <code>/pinghook</code>. You should receive a DM from the bot with your webhook URL.</p>
+
+                <div class="callout callout-info">
+                    <strong>Self-hosting note:</strong> update the Request URL in Step 3 to your own domain (e.g. <code>https://yourdomain.com/slack/events</code>).
+                </div>
             </section>
 
             <!-- GRAFANA -->
