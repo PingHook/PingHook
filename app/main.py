@@ -103,20 +103,31 @@ async def slack_events(request: Request, background_tasks: BackgroundTasks):
     if not verify_slack_signature(body, timestamp, signature):
         raise HTTPException(status_code=403, detail="Invalid signature")
 
-    form       = await request.form()
-    user_id    = form.get("user_id", "")
-    channel_id = form.get("channel_id", "")
-    text       = (form.get("text") or "").strip()
+    form         = await request.form()
+    user_id      = form.get("user_id", "")
+    channel_id   = form.get("channel_id", "")
+    channel_name = form.get("channel_name", "")
+    text         = (form.get("text") or "").strip()
 
     if not user_id or not channel_id:
         return Response(status_code=200)
+
+    if channel_id.startswith("D"):
+        channel_display = "your DM"
+    elif channel_name == "privategroup":
+        channel_display = "🔒 private channel"
+    else:
+        channel_display = f"#{channel_name}" if channel_name else f"#{channel_id}"
 
     full_text = f"/pinghook {text}" if text else "/pinghook"
 
     async def send_reply(msg: str):
         await slack_post(user_id, html_to_mrkdwn(msg))
 
-    background_tasks.add_task(handle_message, "slack", channel_id, full_text, send_reply)
+    background_tasks.add_task(
+        handle_message, "slack", channel_id, full_text, send_reply,
+        {"channel_display": channel_display},
+    )
     return Response(status_code=200)
 
 

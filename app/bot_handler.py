@@ -63,6 +63,7 @@ async def handle_message(
     platform_user_id: str,
     text: str,
     send_reply,  # async callable: (str) -> None
+    context: dict | None = None,
 ):
     parts   = text.strip().split()
     if not parts:
@@ -89,27 +90,39 @@ async def handle_message(
             await send_reply("⚠️ Failed to create your account. Please try again.")
             return
         url = _webhook_url(user["api_key"])
-        await send_reply(
-            f"👋 <b>Welcome to PingHook!</b>\n\n"
-            f"Your webhook URL:\n"
-            f"<code>{url}/your-label</code>\n\n"
-            f"<b>The label is the signal.</b>\n"
-            f"Append it to describe what happened — your code decides when to fire:\n"
-            f"<code>{url}/ci-failed</code>\n"
-            f"<code>{url}/grafana-alert</code>\n"
-            f"<code>{url}/payment-received</code>\n\n"
-            f"<b>Quick test:</b>\n"
-            f"<code>curl -X POST {url}/test -d \"Hello!\"</code>\n\n"
-            f"──────────────────\n"
-            f"<b>Fan out to Slack:</b>\n"
-            f"/pinghook connect slack &lt;webhook-url&gt;\n\n"
-            f"<b>History &amp; replay:</b>\n"
-            f"/pinghook history · /pinghook replay 1\n\n"
-            f"<b>Advanced:</b> /pinghook rules — filter noise from sources you don't control\n"
-            f"(Grafana, Uptime Kuma, GitHub webhooks)\n\n"
-            f"/pinghook help — all commands\n\n"
-            f"🌐 <a href=\"https://pinghook.dev\">pinghook.dev</a> — docs, examples &amp; more"
-        )
+        channel_display = (context or {}).get("channel_display")
+
+        if channel_display:
+            await send_reply(
+                f"🔔 <b>PingHook connected to {channel_display}</b>\n\n"
+                f"Webhook URL for this channel:\n"
+                f"<code>{url}/your-label</code>\n\n"
+                f"<b>Label = the signal.</b> Append it to the URL:\n"
+                f"<code>{url}/ci-failed</code>\n"
+                f"<code>{url}/grafana-alert</code>\n"
+                f"<code>{url}/payment-received</code>\n\n"
+                f"<b>Quick test:</b>\n"
+                f"<code>curl -X POST {url}/test -d \"Hello\"</code>\n\n"
+                f"/pinghook help — all commands\n"
+                f"🌐 <a href=\"https://pinghook.dev\">pinghook.dev</a>"
+            )
+        else:
+            await send_reply(
+                f"👋 <b>Welcome to PingHook!</b>\n\n"
+                f"Your webhook URL:\n"
+                f"<code>{url}/your-label</code>\n\n"
+                f"<b>Label = the signal.</b> Append it to the URL:\n"
+                f"<code>{url}/ci-failed</code>\n"
+                f"<code>{url}/grafana-alert</code>\n"
+                f"<code>{url}/payment-received</code>\n\n"
+                f"<b>Quick test:</b>\n"
+                f"<code>curl -X POST {url}/test -d \"Hello\"</code>\n\n"
+                f"──────────────────\n"
+                f"<b>History &amp; replay:</b> /pinghook history · /pinghook replay 1\n"
+                f"<b>Rules:</b> /pinghook rules — filter noise from Grafana, GitHub &amp; more\n\n"
+                f"/pinghook help — all commands\n"
+                f"🌐 <a href=\"https://pinghook.dev\">pinghook.dev</a>"
+            )
         return
 
     if not user:
