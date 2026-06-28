@@ -34,7 +34,53 @@ HELP_TEXT = (
     "/pinghook usage — view ping stats\n"
     "/pinghook history — last 10 delivered pings\n"
     "/pinghook replay &lt;n&gt; — re-send ping #n\n"
+    "/pinghook docs — explain each command with examples\n"
     "/pinghook help — this message"
+)
+
+DOCS_TEXT = (
+    "<b>📖 PingHook — command reference</b>\n\n"
+
+    "<b>/pinghook start</b>\n"
+    "Creates your account and returns the webhook URL for this channel. "
+    "Safe to run again — returns the same URL if you already have one.\n\n"
+
+    "<b>/pinghook mykey</b>\n"
+    "Shows your current webhook URL without creating anything.\n\n"
+
+    "<b>/pinghook regen</b>\n"
+    "Regenerates your API key. Old URL stops working immediately — "
+    "update all scripts before confirming. Requires <code>/pinghook regen confirm</code>.\n\n"
+
+    "<b>/pinghook channels</b>\n"
+    "Lists all active delivery channels (Slack, Telegram, incoming webhooks).\n\n"
+
+    "<b>/pinghook connect slack &lt;url&gt;</b>\n"
+    "Adds a Slack incoming webhook as a fan-out destination. "
+    "Useful for routing pings to additional workspaces.\n\n"
+
+    "<b>/pinghook disconnect &lt;n&gt;</b>\n"
+    "Removes channel number <code>n</code> from the list shown by <code>/pinghook channels</code>.\n\n"
+
+    "<b>/pinghook rules</b>\n"
+    "Lists active delivery rules. Rules run on every incoming ping — all must pass for delivery.\n"
+    "  · <code>/pinghook rules add keyword error</code> — only deliver if payload contains 'error'\n"
+    "  · <code>/pinghook rules add dedup 10</code> — suppress same label within 10 minutes\n"
+    "  · <code>/pinghook rules add labels ci-failed payment-received</code> — allow-list specific labels\n"
+    "  · <code>/pinghook rules remove 1</code> — remove rule #1\n"
+    "  · <code>/pinghook rules clear confirm</code> — remove all rules\n\n"
+
+    "<b>/pinghook usage</b>\n"
+    "Shows ping counts for today, this week, and all time. Includes suppressed ping count.\n\n"
+
+    "<b>/pinghook history</b>\n"
+    "Shows the last 10 delivered pings with label, age, and payload preview.\n\n"
+
+    "<b>/pinghook replay &lt;n&gt;</b>\n"
+    "Re-delivers ping #n from history to all active channels. "
+    "Useful after connecting a new channel or fixing a missed alert.\n\n"
+
+    "🌐 <a href=\"https://pinghook.dev/docs\">pinghook.dev/docs</a> — full reference &amp; examples"
 )
 
 
@@ -103,7 +149,9 @@ async def handle_message(
                 f"<code>{url}/payment-received</code>\n\n"
                 f"<b>Quick test:</b>\n"
                 f"<code>curl -X POST {url}/test -d \"Hello\"</code>\n\n"
-                f"/pinghook help — all commands\n"
+                f"<b>Reduce noise:</b> /pinghook rules — keyword filters, dedup, label allow-list\n\n"
+                f"<b>Reduce noise:</b> /pinghook rules — keyword filters, dedup, label allow-list\n\n"
+                f"/pinghook docs — command reference · /pinghook help — all commands\n"
                 f"🌐 <a href=\"https://pinghook.dev\">pinghook.dev</a>"
             )
         else:
@@ -262,6 +310,9 @@ async def handle_message(
 
     elif command == "/help":
         await send_reply(HELP_TEXT)
+
+    elif command == "/docs":
+        await send_reply(DOCS_TEXT)
 
     else:
         await send_reply("Unknown command. Type /help to see available commands.")
