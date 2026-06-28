@@ -103,11 +103,12 @@ async def slack_events(request: Request, background_tasks: BackgroundTasks):
     if not verify_slack_signature(body, timestamp, signature):
         raise HTTPException(status_code=403, detail="Invalid signature")
 
-    form    = await request.form()
-    user_id = form.get("user_id", "")
-    text    = (form.get("text") or "").strip()
+    form       = await request.form()
+    user_id    = form.get("user_id", "")
+    channel_id = form.get("channel_id", "")
+    text       = (form.get("text") or "").strip()
 
-    if not user_id:
+    if not user_id or not channel_id:
         return Response(status_code=200)
 
     full_text = f"/pinghook {text}" if text else "/pinghook"
@@ -115,7 +116,7 @@ async def slack_events(request: Request, background_tasks: BackgroundTasks):
     async def send_reply(msg: str):
         await slack_post(user_id, html_to_mrkdwn(msg))
 
-    background_tasks.add_task(handle_message, "slack", user_id, full_text, send_reply)
+    background_tasks.add_task(handle_message, "slack", channel_id, full_text, send_reply)
     return Response(status_code=200)
 
 
