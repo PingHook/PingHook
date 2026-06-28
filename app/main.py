@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import os
@@ -5,12 +6,13 @@ import re
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, Request, HTTPException, Query
+from fastapi import BackgroundTasks, FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from app.bot import bot
 from app.bot_handler import handle_message
+from app.slack_bot import verify_slack_signature, post_message as slack_post, html_to_mrkdwn
 from app.config import settings
 from app.database import (
     get_user_by_api_key,
@@ -85,6 +87,36 @@ async def telegram_webhook(request: Request):
         logger.error(f"handle_message error: {e}")
 
     return {"ok": True}
+
+
+# ── Slack slash command receiver ──────────────────────────────────────────────
+
+@app.post("/slack/events")
+async def slack_events(request: Request, background_tasks: BackgroundTasks):
+    if not settings.SLACK_SIGNING_SECRET:
+        raise HTTPException(status_code=503, detail="Slack not configured")
+
+    body      = await request.body()
+    timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
+    signature = request.headers.get("X-Slack-Signature", "")
+
+    if not verify_slack_signature(body, timestamp, signature):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    form    = await request.form()
+    user_id = form.get("user_id", "")
+    text    = (form.get("text") or "").strip()
+
+    if not user_id:
+        return Response(status_code=200)
+
+    full_text = f"/pinghook {text}" if text else "/pinghook"
+
+    async def send_reply(msg: str):
+        await slack_post(user_id, html_to_mrkdwn(msg))
+
+    background_tasks.add_task(handle_message, "slack", user_id, full_text, send_reply)
+    return Response(status_code=200)
 
 
 # ── Rules resolver ────────────────────────────────────────────────────────────

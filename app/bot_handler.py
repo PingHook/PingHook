@@ -23,19 +23,19 @@ from app.utils import relative_time
 logger = logging.getLogger(__name__)
 
 HELP_TEXT = (
-    "PingHook commands:\n"
-    "/start — get your webhook URL\n"
-    "/mykey — show current URL\n"
-    "/regen — regenerate API key\n"
-    "/channels — list delivery channels\n"
-    "/connect slack &lt;url&gt; — add Slack\n"
-    "/connect discord &lt;url&gt; — add Discord\n"
-    "/disconnect &lt;n&gt; — remove a channel\n"
-    "/rules — manage alerting rules\n"
-    "/usage — view ping stats\n"
-    "/history — last 10 delivered pings\n"
-    "/replay &lt;n&gt; — re-send ping #n\n"
-    "/help — this message"
+    "<b>PingHook commands:</b>\n"
+    "/pinghook start — get your webhook URL\n"
+    "/pinghook mykey — show current URL\n"
+    "/pinghook regen — regenerate API key\n"
+    "/pinghook channels — list delivery channels\n"
+    "/pinghook connect slack &lt;url&gt; — add Slack incoming webhook\n"
+    "/pinghook connect discord &lt;url&gt; — add Discord\n"
+    "/pinghook disconnect &lt;n&gt; — remove a channel\n"
+    "/pinghook rules — manage alerting rules\n"
+    "/pinghook usage — view ping stats\n"
+    "/pinghook history — last 10 delivered pings\n"
+    "/pinghook replay &lt;n&gt; — re-send ping #n\n"
+    "/pinghook help — this message"
 )
 
 
@@ -50,18 +50,18 @@ def _webhook_url(api_key: str) -> str:
 def _connect_instructions(channel_type: str) -> str:
     if channel_type == "slack":
         return (
-            "To get your Slack webhook URL:\n"
+            "To get your Slack incoming webhook URL:\n"
             "1. Go to api.slack.com/apps\n"
             "2. Create app → Enable Incoming Webhooks\n"
             "3. Add to workspace → Copy webhook URL\n"
-            "4. Send: /connect slack https://hooks.slack.com/..."
+            "4. Send: /pinghook connect slack https://hooks.slack.com/..."
         )
     elif channel_type == "discord":
         return (
             "To get your Discord webhook URL:\n"
             "1. Open channel settings → Integrations → Webhooks\n"
             "2. Create webhook → Copy URL\n"
-            "3. Send: /connect discord https://discord.com/api/webhooks/..."
+            "3. Send: /pinghook connect discord https://discord.com/api/webhooks/..."
         )
     return ""
 
@@ -78,6 +78,15 @@ async def handle_message(
 
     command = parts[0].lower()
     args    = parts[1:]
+
+    # Normalize /pinghook <subcommand> → /<subcommand>
+    if command == "/pinghook":
+        if not args:
+            command = "/start"
+        else:
+            command = "/" + args[0].lower()
+            args    = args[1:]
+
     user    = await get_user_by_platform(platform, platform_user_id)
 
     # /start always works even without an existing account
@@ -101,13 +110,13 @@ async def handle_message(
             f"<code>curl -X POST {url}/test -d \"Hello!\"</code>\n\n"
             f"──────────────────\n"
             f"<b>Fan out to Slack or Discord:</b>\n"
-            f"/connect slack &lt;webhook-url&gt;\n"
-            f"/connect discord &lt;webhook-url&gt;\n\n"
+            f"/pinghook connect slack &lt;webhook-url&gt;\n"
+            f"/pinghook connect discord &lt;webhook-url&gt;\n\n"
             f"<b>History &amp; replay:</b>\n"
-            f"/history · /replay 1\n\n"
-            f"<b>Advanced:</b> /rules — filter noise from sources you don't control\n"
+            f"/pinghook history · /pinghook replay 1\n\n"
+            f"<b>Advanced:</b> /pinghook rules — filter noise from sources you don't control\n"
             f"(Grafana, Uptime Kuma, GitHub webhooks)\n\n"
-            f"/help — all commands\n\n"
+            f"/pinghook help — all commands\n\n"
             f"🌐 <a href=\"https://pinghook.dev\">pinghook.dev</a> — docs, examples &amp; more"
         )
         return

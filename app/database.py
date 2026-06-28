@@ -40,9 +40,10 @@ async def create_user(platform: str, platform_id: str) -> dict | None:
         }).execute()
 
     def _insert_channel():
+        channel_type = "slack_native" if platform == "slack" else platform
         return supabase.table("channels").insert({
             "user_id":     user["id"],
-            "type":        platform,
+            "type":        channel_type,
             "destination": platform_id,
             "label":       "this chat" if platform == "telegram" else platform,
         }).execute()

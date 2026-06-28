@@ -4,6 +4,7 @@ import logging
 import httpx
 
 from app.bot import bot
+from app.config import settings
 from app.utils import format_telegram_message
 
 logger = logging.getLogger(__name__)
@@ -68,6 +69,21 @@ async def send_discord(webhook_url: str, label: str, payload: str, footer: bool 
         return resp.status_code in (200, 204)
 
 
+async def send_slack_native(slack_user_id: str, label: str, payload: str, footer: bool = True) -> bool:
+    text = _format_slack(label, payload)
+    if footer:
+        text += _FOOTER_SLACK
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://slack.com/api/chat.postMessage",
+            headers={"Authorization": f"Bearer {settings.SLACK_BOT_TOKEN}"},
+            json={"channel": slack_user_id, "text": text},
+            timeout=10,
+        )
+        data = resp.json()
+        return data.get("ok", False)
+
+
 async def dispatch(channel: dict, label: str, payload: str, footer: bool = True) -> bool:
     try:
         ch_type = channel["type"]
@@ -76,6 +92,8 @@ async def dispatch(channel: dict, label: str, payload: str, footer: bool = True)
             return await send_telegram(dest, label, payload, footer)
         elif ch_type == "slack":
             return await send_slack(dest, label, payload, footer)
+        elif ch_type == "slack_native":
+            return await send_slack_native(dest, label, payload, footer)
         elif ch_type == "discord":
             return await send_discord(dest, label, payload, footer)
         return False

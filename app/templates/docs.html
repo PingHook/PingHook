@@ -415,7 +415,7 @@
                 <div class="step-list">
                     <div class="step-item">
                         <div class="step-num">1</div>
-                        <p>Open Telegram and message <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a>. Send <code>/start</code>. You receive a unique webhook URL — no email, no sign-up.</p>
+                        <p>Get your webhook URL from the bot — <strong>Slack:</strong> type <code>/pinghook</code> in any channel &nbsp;·&nbsp; <strong>Telegram:</strong> message <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a> and send <code>/pinghook</code>. No email, no sign-up.</p>
                     </div>
                     <div class="step-item">
                         <div class="step-num">2</div>
@@ -445,7 +445,7 @@
                 <table class="docs-table">
                     <thead><tr><th>Field</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td>api_key</td><td>Your unique key — get it from <code>/start</code> in the bot</td></tr>
+                        <tr><td>api_key</td><td>Your unique key — get it by sending <code>/pinghook</code> to the bot</td></tr>
                         <tr><td>label</td><td>Optional. Any URL path after your key — slashes become part of the label: <code>/send/KEY/github/ci/prod</code>. Shows in every notification.</td></tr>
                         <tr><td>body</td><td>Any payload — JSON or plain text. Max 100 KB. <code>Content-Type</code> header is optional.</td></tr>
                     </tbody>
@@ -618,24 +618,24 @@ _By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
             <!-- LAYER 3 -->
             <section class="docs-section" id="layer3">
                 <h2>Layer 3 — Global Bot Rules <span class="section-badge">Fallback</span></h2>
-                <p>Configured once in the Telegram bot via <code>/rules</code>. Applies to every ping on your key — use when you can't modify the body or the URL at all.</p>
+                <p>Configured once via <code>/pinghook rules</code> in Slack or Telegram. Applies to every ping on your key — use when you can't modify the body or the URL at all.</p>
 
                 <div class="cmd-grid">
                     <div class="cmd-item">
-                        <code>/rules add keyword error</code>
+                        <code>/pinghook rules add keyword error</code>
                         <p>Only deliver if payload contains "error" (case-insensitive)</p>
                     </div>
                     <div class="cmd-item">
-                        <code>/rules add dedup 30</code>
+                        <code>/pinghook rules add dedup 30</code>
                         <p>Suppress same label repeated within 30 minutes</p>
                     </div>
                     <div class="cmd-item">
-                        <code>/rules add labels ci deploy</code>
+                        <code>/pinghook rules add labels ci deploy</code>
                         <p>Only deliver pings whose label is "ci" or "deploy"</p>
                     </div>
                     <div class="cmd-item">
-                        <code>/rules remove 2</code>
-                        <p>Remove rule #2. <code>/rules clear confirm</code> removes all.</p>
+                        <code>/pinghook rules remove 2</code>
+                        <p>Remove rule #2. <code>/pinghook rules clear confirm</code> removes all.</p>
                     </div>
                 </div>
 
@@ -650,28 +650,29 @@ _By:_ asaf | _Duration:_ 42s | _Status:_ ~~failing~~ passing"</span></div>
             <!-- BOT COMMANDS -->
             <section class="docs-section" id="bot-commands">
                 <h2>Bot Commands</h2>
-                <p>All commands are sent to <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a> in Telegram.</p>
+                <p>All commands use the <code>/pinghook</code> prefix — identical on both <strong>Slack</strong> and <strong>Telegram</strong>. In Slack, type them in any channel or DM with the bot. In Telegram, send them to <a href="https://t.me/PingHookBot" target="_blank" rel="noopener">@PingHookBot</a>.</p>
 
                 <table class="docs-table">
                     <thead><tr><th>Command</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td>/start</td><td>Create account and get your unique webhook URL</td></tr>
-                        <tr><td>/mykey</td><td>Show current webhook URL</td></tr>
-                        <tr><td>/regen confirm</td><td>Regenerate API key — old key is dead immediately</td></tr>
-                        <tr><td>/channels</td><td>List all active delivery channels</td></tr>
-                        <tr><td>/connect slack &lt;url&gt;</td><td>Add a Slack incoming webhook — validated with a test ping</td></tr>
-                        <tr><td>/connect discord &lt;url&gt;</td><td>Add a Discord webhook — validated with a test ping</td></tr>
-                        <tr><td>/disconnect &lt;n&gt;</td><td>Remove channel #n (from /channels list)</td></tr>
-                        <tr><td>/rules</td><td>List active global rules</td></tr>
-                        <tr><td>/rules add keyword &lt;word&gt;</td><td>Only deliver if payload contains this word</td></tr>
-                        <tr><td>/rules add dedup &lt;minutes&gt;</td><td>Suppress same-label repeats within N minutes</td></tr>
-                        <tr><td>/rules add labels &lt;l1&gt; &lt;l2&gt; …</td><td>Only deliver these labels (whitelist)</td></tr>
-                        <tr><td>/rules remove &lt;n&gt;</td><td>Remove rule #n</td></tr>
-                        <tr><td>/rules clear confirm</td><td>Remove all rules</td></tr>
-                        <tr><td>/usage</td><td>Ping stats — today, this week, all time, last ping</td></tr>
-                        <tr><td>/history</td><td>Last 10 successfully delivered pings with payload preview</td></tr>
-                        <tr><td>/replay &lt;n&gt;</td><td>Re-dispatch ping #n to all channels</td></tr>
-                        <tr><td>/help</td><td>List all commands</td></tr>
+                        <tr><td>/pinghook</td><td>Create account (if new) and get your unique webhook URL</td></tr>
+                        <tr><td>/pinghook start</td><td>Same as above — explicit form</td></tr>
+                        <tr><td>/pinghook mykey</td><td>Show current webhook URL</td></tr>
+                        <tr><td>/pinghook regen confirm</td><td>Regenerate API key — old key is dead immediately</td></tr>
+                        <tr><td>/pinghook channels</td><td>List all active delivery channels</td></tr>
+                        <tr><td>/pinghook connect slack &lt;url&gt;</td><td>Add a Slack incoming webhook — validated with a test ping</td></tr>
+                        <tr><td>/pinghook connect discord &lt;url&gt;</td><td>Add a Discord webhook — validated with a test ping</td></tr>
+                        <tr><td>/pinghook disconnect &lt;n&gt;</td><td>Remove channel #n (from /pinghook channels list)</td></tr>
+                        <tr><td>/pinghook rules</td><td>List active global rules</td></tr>
+                        <tr><td>/pinghook rules add keyword &lt;word&gt;</td><td>Only deliver if payload contains this word</td></tr>
+                        <tr><td>/pinghook rules add dedup &lt;minutes&gt;</td><td>Suppress same-label repeats within N minutes</td></tr>
+                        <tr><td>/pinghook rules add labels &lt;l1&gt; &lt;l2&gt; …</td><td>Only deliver these labels (whitelist)</td></tr>
+                        <tr><td>/pinghook rules remove &lt;n&gt;</td><td>Remove rule #n</td></tr>
+                        <tr><td>/pinghook rules clear confirm</td><td>Remove all rules</td></tr>
+                        <tr><td>/pinghook usage</td><td>Ping stats — today, this week, all time, last ping</td></tr>
+                        <tr><td>/pinghook history</td><td>Last 10 successfully delivered pings with payload preview</td></tr>
+                        <tr><td>/pinghook replay &lt;n&gt;</td><td>Re-dispatch ping #n to all channels</td></tr>
+                        <tr><td>/pinghook help</td><td>List all commands</td></tr>
                     </tbody>
                 </table>
             </section>
@@ -868,7 +869,7 @@ ping(<span class="v">"job-done"</span>, <span class="v">"Backup complete"</span>
                     </tbody>
                 </table>
 
-                <p>When exceeded, you get HTTP 429 with <code>resets_in</code> in the response body (seconds until the window resets). Rate-limited requests are still logged — check <code>/usage</code> in the bot for your counts.</p>
+                <p>When exceeded, you get HTTP 429 with <code>resets_in</code> in the response body (seconds until the window resets). Rate-limited requests are still logged — check <code>/pinghook usage</code> in the bot for your counts.</p>
                 <p>Suppressed pings (filtered by rules) do <strong>not</strong> count against the rate limit.</p>
             </section>
 
@@ -895,7 +896,9 @@ pip install -r requirements.txt</div>
 SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_KEY=your_service_role_key
 BASE_URL=https://your-domain.com
-ADMIN_SECRET=optional_admin_token</div>
+ADMIN_SECRET=optional_admin_token
+SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
+SLACK_SIGNING_SECRET=your_slack_signing_secret</div>
 
                 <p>Apply the schema — paste <code>schema.sql</code> into the Supabase SQL editor and run it.</p>
 

@@ -256,22 +256,6 @@
             color: var(--text-muted);
         }
 
-        /* ── Live counter ── */
-        .live-counter {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            margin-top: 0.6rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .live-counter .counter-value {
-            color: var(--accent-light);
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
         /* ── Telegram Mockup ── */
         .telegram-mockup {
             background: var(--bg-tg);
@@ -809,7 +793,7 @@
                                 View Source
                             </a>
                         </div>
-                        <p class="cta-hint">Type /start — get your URL in under 10 seconds.</p>
+                        <p class="cta-hint">Type /pinghook — get your URL in under 10 seconds.</p>
                     </div>
 
                     <div class="hero-right">
@@ -881,7 +865,7 @@
                     <div class="step">
                         <div class="step-number">1</div>
                         <h3>Start the bot</h3>
-                        <p>Open Telegram, message <code>@PingHookBot</code>, and type <code>/start</code>. You get a unique webhook URL immediately.</p>
+                        <p>In Slack type <code>/pinghook</code> in any channel, or message <code>@PingHookBot</code> on Telegram. You get a unique webhook URL immediately.</p>
                     </div>
                     <div class="step">
                         <div class="step-number">2</div>
@@ -891,7 +875,7 @@
                     <div class="step">
                         <div class="step-number">3</div>
                         <h3>Get notified instantly</h3>
-                        <p>Every POST becomes a message in your Telegram chat. Optionally connect Slack or Discord via <code>/connect slack</code> and fan out to all three at once.</p>
+                        <p>Every POST becomes a message in your chat. Optionally connect additional channels via <code>/pinghook connect slack</code> and fan out to all three at once.</p>
                     </div>
                 </div>
             </div>
@@ -908,7 +892,7 @@
                     <div class="feature-card">
                         <div class="feature-icon">📡</div>
                         <h3>Multi-Channel Delivery</h3>
-                        <p>Fan out to Telegram, Slack, and Discord simultaneously. Connect Slack with <code>/connect slack &lt;url&gt;</code> — PingHook validates and sends a test ping before saving.</p>
+                        <p>Fan out to Telegram, Slack, and Discord simultaneously. Connect Slack with <code>/pinghook connect slack &lt;url&gt;</code> — PingHook validates and sends a test ping before saving.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🏷️</div>
@@ -933,14 +917,14 @@
                     <div class="feature-card">
                         <div class="feature-icon">📜</div>
                         <h3>History &amp; Replay</h3>
-                        <p>Use <code>/history</code> to see your last 10 delivered pings with payload previews. Use <code>/replay 3</code> to re-dispatch any ping to all channels — perfect for recovering a missed alert or testing a rule change.</p>
+                        <p>Use <code>/pinghook history</code> to see your last 10 delivered pings with payload previews. Use <code>/pinghook replay 3</code> to re-dispatch any ping to all channels — perfect for recovering a missed alert or testing a rule change.</p>
                     </div>
                 </div>
 
                 <!-- Advanced note -->
                 <div class="advanced-strip">
                     <span class="advanced-tag">Advanced</span>
-                    <p><strong>Filtering &amp; rules</strong> — three layers: inline <code>pinghook_rules</code> in your JSON body, query params (<code>?if=</code>, <code>?textif=</code>, <code>?dedup=</code>, <code>?channel=</code>, <code>?silent=</code>), or global bot rules via <code>/rules</code> for sources you can't touch at all. See the docs section below.</p>
+                    <p><strong>Filtering &amp; rules</strong> — three layers: inline <code>pinghook_rules</code> in your JSON body, query params (<code>?if=</code>, <code>?textif=</code>, <code>?dedup=</code>, <code>?channel=</code>, <code>?silent=</code>), or global bot rules via <code>/pinghook rules</code> for sources you can't touch at all. See the docs section below.</p>
                 </div>
 
                 <!-- Specs -->
@@ -1061,7 +1045,7 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
                 <div class="faq-list">
                     <div class="faq-item">
                         <h3>How do I add Slack or Discord?</h3>
-                        <p>Open the Telegram bot and send <code>/connect slack https://hooks.slack.com/...</code> or <code>/connect discord https://discord.com/api/webhooks/...</code>. PingHook validates the URL with a test ping before saving. Once connected, all future webhooks fan out to every channel at once.</p>
+                        <p>Send <code>/pinghook connect slack https://hooks.slack.com/...</code> or <code>/pinghook connect discord https://discord.com/api/webhooks/...</code> to the bot (Slack or Telegram). PingHook validates the URL with a test ping before saving. Once connected, all future webhooks fan out to every channel at once.</p>
                     </div>
                     <div class="faq-item">
                         <h3>What's the rate limit?</h3>
@@ -1073,11 +1057,11 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
                     </div>
                     <div class="faq-item">
                         <h3>How do filtering and alerting rules work?</h3>
-                        <p>PingHook has three layers. <strong>Layer 1:</strong> add a <code>pinghook_rules</code> key to your JSON body with conditions, logic, dedup, and channel — evaluated against your payload fields, stripped before delivery. <strong>Layer 2:</strong> append <code>?if=</code>, <code>?textif=</code>, <code>?dedup=</code>, <code>?channel=</code>, or <code>?silent=</code> to the URL — works for any source without touching the body. <strong>Layer 3:</strong> global bot rules via <code>/rules add keyword</code>, <code>/rules add dedup</code>, <code>/rules add labels</code> — fallback for sources you can't touch at all. More specific layers take full priority.</p>
+                        <p>PingHook has three layers. <strong>Layer 1:</strong> add a <code>pinghook_rules</code> key to your JSON body with conditions, logic, dedup, and channel — evaluated against your payload fields, stripped before delivery. <strong>Layer 2:</strong> append <code>?if=</code>, <code>?textif=</code>, <code>?dedup=</code>, <code>?channel=</code>, or <code>?silent=</code> to the URL — works for any source without touching the body. <strong>Layer 3:</strong> global bot rules via <code>/pinghook rules add keyword</code>, <code>/pinghook rules add dedup</code>, <code>/pinghook rules add labels</code> — fallback for sources you can't touch at all. More specific layers take full priority.</p>
                     </div>
                     <div class="faq-item">
                         <h3>What if someone gets my webhook URL?</h3>
-                        <p>The URL is write-only — it can only trigger notifications to your chat, never read data. If compromised, send <code>/regen confirm</code> in the bot. Your old key is invalidated immediately and all connected channels receive the new URL automatically.</p>
+                        <p>The URL is write-only — it can only trigger notifications to your chat, never read data. If compromised, send <code>/pinghook regen confirm</code> in the bot. Your old key is invalidated immediately and all connected channels receive the new URL automatically.</p>
                     </div>
                     <div class="faq-item">
                         <h3>Can I self-host this?</h3>
@@ -1106,15 +1090,6 @@ requests.post(PINGHOOK_URL + <span class="c-val">"/cron-done"</span>, data=<span
             btn.classList.add('active');
         }
 
-        fetch('/api/stats/public')
-            .then(r => r.json())
-            .then(d => {
-                const el = document.getElementById('ping-count');
-                if (el && d.pings_today !== undefined) {
-                    el.textContent = d.pings_today.toLocaleString();
-                }
-            })
-            .catch(() => {});
     </script>
 
 </body>
